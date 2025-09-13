@@ -4,6 +4,69 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fiscality - Financial Transparency Platform</title>
+    <!-- Firebase v12 CDN -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js';
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification } from 'https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js';
+        
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBVVKhJzO6UtOFH2-7x7x7x7x7x7x7x7x7", // This will be replaced by server
+            authDomain: "fiscality-a7952.firebaseapp.com", 
+            projectId: "fiscality-a7952",
+            storageBucket: "fiscality-a7952.firebasestorage.app",
+            messagingSenderId: "885932899890",
+            appId: "1:885932899890:web:77fdf2b50e44e8f701862b"
+        };
+        
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        
+        // Make auth functions available globally
+        window.firebaseAuth = auth;
+        window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
+        window.signInWithEmailAndPassword = signInWithEmailAndPassword;
+        window.sendEmailVerification = sendEmailVerification;
+        
+        // Firebase Auth Functions
+        window.signup = async function(email, password) {
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+                
+                // Send email verification
+                await sendEmailVerification(user);
+                
+                alert('Account created successfully! Please check your email to verify your account before logging in.');
+                return { success: true, user };
+            } catch (error) {
+                console.error('Signup error:', error);
+                alert('Error creating account: ' + error.message);
+                return { success: false, error: error.message };
+            }
+        };
+        
+        window.login = async function(email, password) {
+            try {
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+                
+                if (!user.emailVerified) {
+                    alert('Please verify your email before logging in. Check your email for the verification link.');
+                    return { success: false, error: 'Email not verified' };
+                }
+                
+                alert('Login successful! Welcome to Fiscality.');
+                return { success: true, user };
+            } catch (error) {
+                console.error('Login error:', error);
+                alert('Error logging in: ' + error.message);
+                return { success: false, error: error.message };
+            }
+        };
+    </script>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
