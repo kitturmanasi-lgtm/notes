@@ -1,0 +1,9 @@
+Security & Error Handling
+Our current prototype focuses on transparency and visualization, but we have also considered core security aspects
+Sensitive credentials (Firebase configuration keys) are managed by usinf environment variables (`.env` files) instead of being coded into it. 
+For future versions, we plan to integrate secret managers offered by cloud providers (e.g., AWS Secrets Manager, Azure Key Vault, GCP Secret Manager) 
+to enhance safety.  
+Error handling at the API level when we're using Express.js middleware,making sure that invalid inputs or failed authentication attempts 
+return clear error messages without exposing system details. Input validation and data sanitization will be enforced to prevent malformed data or 
+injection attacks. While some of these features are still partially working, or mocked up in the prototype, theyre part of our planning that will ensure the platform is transparent 
+but also secure and reliable.
