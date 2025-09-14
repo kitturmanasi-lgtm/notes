@@ -42,6 +42,30 @@
         }
     </style>
 </head>
+<script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } 
+from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+
+const auth = getAuth(app);
+
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  // Your web app's Firebase configuration
+  const firebaseConfig = {
+    apiKey: "AIzaSyAKbOHx1RHj3lwoariNVvjevZSnTeZ6gJI",
+    authDomain: "fiscality-a7952.firebaseapp.com",
+    projectId: "fiscality-a7952",
+    storageBucket: "fiscality-a7952.firebasestorage.app",
+    messagingSenderId: "885932899890",
+    appId: "1:885932899890:web:77fdf2b50e44e8f701862b"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+</script>
 <body class="bg-gray-50 font-sans">
     <!-- Login Page -->
     <div id="loginPage" class="min-h-screen gradient-bg flex items-center justify-center p-4">
@@ -73,7 +97,7 @@
     <!-- Sign Up Page -->
     <div id="signUpPage" class="min-h-screen gradient-bg flex items-center justify-center p-4 hidden">
         <div class="w-full max-w-md">
-            <h1 class="text-4xl font-bold text-white text-center mb-8">Create an Account</h1>
+            <h1 class="text-4xl font-bold text-white text-center mb-8">You can Create an Account</h1>
             <div class="bg-white rounded-2xl card-shadow p-8">
                 <div class="space-y-6">
                     <input type="text" id="signupUsername" placeholder="Username" 
@@ -100,7 +124,7 @@
     <div id="whoAreYouPage" class="min-h-screen bg-gray-50 p-4 hidden">
         <div class="max-w-4xl mx-auto pt-12">
             <h1 class="text-4xl font-bold text-gray-800 text-center mb-12">Who Are You?</h1>
-            <div class="grid md:grid-cols-3 gap-8 mb-12">
+            <div class="grid md:grid-cols-4 gap-6 mb-12">
                 <div onclick="selectUserType('student')" 
                      class="bg-white rounded-2xl card-shadow p-8 text-center cursor-pointer hover:bg-blue-50 transition duration-300 border-2 border-transparent hover:border-primary-blue">
                     <div class="text-6xl mb-4">🎓</div>
@@ -115,6 +139,11 @@
                      class="bg-white rounded-2xl card-shadow p-8 text-center cursor-pointer hover:bg-blue-50 transition duration-300 border-2 border-transparent hover:border-primary-blue">
                     <div class="text-6xl mb-4">🏛️</div>
                     <h3 class="text-xl font-semibold text-gray-800">Government</h3>
+                </div>
+                <div onclick="selectUserType('citizens')" 
+                     class="bg-white rounded-2xl card-shadow p-8 text-center cursor-pointer hover:bg-blue-50 transition duration-300 border-2 border-transparent hover:border-primary-blue">
+                    <div class="text-6xl mb-4">👥</div>
+                    <h3 class="text-xl font-semibold text-gray-800">Citizens</h3>
                 </div>
             </div>
             <div class="text-center">
@@ -577,6 +606,13 @@
                     <input type="password" id="govPassword" placeholder="Password (minimum 10 characters)" 
                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-transparent outline-none">
                 `;
+            } else if (currentUserType === 'citizens') {
+                fieldsContainer.innerHTML = `
+                    <input type="email" id="citizenEmail" placeholder="Email" 
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-transparent outline-none">
+                    <input type="password" id="citizenPassword" placeholder="Password" 
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-transparent outline-none">
+                `;
             }
             
             // Initialize dashboard features after content is loaded
@@ -584,6 +620,8 @@
                 if (currentUserType === 'student') {
                     displayTransactions();
                     drawCharts();
+                } else if (currentUserType === 'citizens') {
+                    drawCitizenCharts();
                 }
             }, 100);
         }
@@ -597,6 +635,23 @@
                             <div class="text-4xl mb-4 text-red-500">⚠️</div>
                             <h3 class="text-lg font-semibold mb-2">Invalid Password Length</h3>
                             <p class="text-gray-600">Password must be more than 9 characters</p>
+                        </div>
+                    `);
+                    return;
+                }
+                showDashboard();
+                return;
+            }
+
+            if (currentUserType === 'citizens') {
+                const email = document.getElementById('citizenEmail').value;
+                const password = document.getElementById('citizenPassword').value;
+                if (!email || !password) {
+                    showPopup(`
+                        <div class="text-center">
+                            <div class="text-4xl mb-4 text-red-500">⚠️</div>
+                            <h3 class="text-lg font-semibold mb-2">Missing Information</h3>
+                            <p class="text-gray-600">Please enter both email and password</p>
                         </div>
                     `);
                     return;
@@ -962,6 +1017,205 @@
                         </div>
                     </div>
                 `;
+            } else if (currentUserType === 'citizens') {
+                content.innerHTML = `
+                    <div class="mb-8">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-6">Citizens Dashboard</h2>
+                        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 mb-8 border border-blue-200">
+                            <div class="flex items-center mb-4">
+                                <span class="text-3xl mr-3">👥</span>
+                                <div>
+                                    <h3 class="text-xl font-bold text-blue-800">Public Financial Transparency</h3>
+                                    <p class="text-blue-600">Access to institutional financial overview</p>
+                                </div>
+                            </div>
+                            <p class="text-gray-700">As a citizen, you have access to high-level financial information to ensure transparency and accountability in public institutions.</p>
+                        </div>
+                        
+                        <div class="grid md:grid-cols-3 gap-6 mb-8">
+                            <div class="bg-white rounded-xl card-shadow p-6">
+                                <h3 class="text-lg font-semibold mb-2">Total Public Budget</h3>
+                                <p class="text-3xl font-bold text-primary-blue">₹2.5 Cr</p>
+                                <p class="text-sm text-gray-600">Annual allocation</p>
+                            </div>
+                            <div class="bg-white rounded-xl card-shadow p-6">
+                                <h3 class="text-lg font-semibold mb-2">Departments Funded</h3>
+                                <p class="text-3xl font-bold text-success-green">12</p>
+                                <p class="text-sm text-gray-600">Active departments</p>
+                            </div>
+                            <div class="bg-white rounded-xl card-shadow p-6">
+                                <h3 class="text-lg font-semibold mb-2">Transparency Score</h3>
+                                <p class="text-3xl font-bold text-purple-600">95%</p>
+                                <p class="text-sm text-gray-600">Public disclosure</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Overall Financial Distribution -->
+                    <div class="bg-white rounded-xl card-shadow p-8 mb-8">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-6">💰 Overall Financial Distribution</h2>
+                        
+                        <div class="grid md:grid-cols-2 gap-8 mb-8">
+                            <!-- Major Categories -->
+                            <div class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6 border border-green-200">
+                                <h3 class="text-xl font-bold text-green-800 mb-4">🏫 Academic Departments</h3>
+                                <div class="space-y-4">
+                                    <div class="flex justify-between items-center p-3 bg-white rounded-lg">
+                                        <div>
+                                            <p class="font-medium text-gray-800">Engineering Departments</p>
+                                            <p class="text-sm text-gray-600">CS, ECE, Mechanical, Civil</p>
+                                        </div>
+                                        <span class="font-bold text-green-600">₹1.8 Cr</span>
+                                    </div>
+                                    <div class="flex justify-between items-center p-3 bg-white rounded-lg">
+                                        <div>
+                                            <p class="font-medium text-gray-800">Research & Development</p>
+                                            <p class="text-sm text-gray-600">Innovation projects, labs</p>
+                                        </div>
+                                        <span class="font-bold text-green-600">₹35 L</span>
+                                    </div>
+                                    <div class="flex justify-between items-center p-3 bg-white rounded-lg">
+                                        <div>
+                                            <p class="font-medium text-gray-800">Faculty Development</p>
+                                            <p class="text-sm text-gray-600">Training, conferences</p>
+                                        </div>
+                                        <span class="font-bold text-green-600">₹15 L</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Student Activities -->
+                            <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200">
+                                <h3 class="text-xl font-bold text-blue-800 mb-4">🎓 Student Activities</h3>
+                                <div class="space-y-4">
+                                    <div class="flex justify-between items-center p-3 bg-white rounded-lg">
+                                        <div>
+                                            <p class="font-medium text-gray-800">Student Clubs</p>
+                                            <p class="text-sm text-gray-600">Technical, cultural, sports</p>
+                                        </div>
+                                        <span class="font-bold text-blue-600">₹18 L</span>
+                                    </div>
+                                    <div class="flex justify-between items-center p-3 bg-white rounded-lg">
+                                        <div>
+                                            <p class="font-medium text-gray-800">Events & Competitions</p>
+                                            <p class="text-sm text-gray-600">Annual fest, hackathons</p>
+                                        </div>
+                                        <span class="font-bold text-blue-600">₹12 L</span>
+                                    </div>
+                                    <div class="flex justify-between items-center p-3 bg-white rounded-lg">
+                                        <div>
+                                            <p class="font-medium text-gray-800">Student Welfare</p>
+                                            <p class="text-sm text-gray-600">Scholarships, support</p>
+                                        </div>
+                                        <span class="font-bold text-blue-600">₹8 L</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Infrastructure & Operations -->
+                        <div class="bg-gradient-to-br from-orange-50 to-yellow-50 rounded-xl p-6 border border-orange-200">
+                            <h3 class="text-xl font-bold text-orange-800 mb-4">🏗️ Infrastructure & Operations</h3>
+                            <div class="grid md:grid-cols-3 gap-4">
+                                <div class="flex justify-between items-center p-3 bg-white rounded-lg">
+                                    <div>
+                                        <p class="font-medium text-gray-800">Campus Maintenance</p>
+                                        <p class="text-sm text-gray-600">Buildings, utilities</p>
+                                    </div>
+                                    <span class="font-bold text-orange-600">₹25 L</span>
+                                </div>
+                                <div class="flex justify-between items-center p-3 bg-white rounded-lg">
+                                    <div>
+                                        <p class="font-medium text-gray-800">Technology Upgrades</p>
+                                        <p class="text-sm text-gray-600">IT infrastructure</p>
+                                    </div>
+                                    <span class="font-bold text-orange-600">₹20 L</span>
+                                </div>
+                                <div class="flex justify-between items-center p-3 bg-white rounded-lg">
+                                    <div>
+                                        <p class="font-medium text-gray-800">Administrative</p>
+                                        <p class="text-sm text-gray-600">Operations, staff</p>
+                                    </div>
+                                    <span class="font-bold text-orange-600">₹15 L</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- High-Level Visualization -->
+                    <div class="bg-white rounded-xl card-shadow p-8 mb-8">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-6">📊 Budget Overview & Trends</h2>
+                        <div class="grid md:grid-cols-2 gap-8">
+                            <div>
+                                <h3 class="text-lg font-semibold mb-4">Annual Budget Distribution</h3>
+                                <div class="chart-placeholder h-64 rounded-lg flex items-center justify-center relative">
+                                    <canvas id="citizenBudgetChart" width="400" height="200"></canvas>
+                                </div>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold mb-4">Quarterly Spending Trends</h3>
+                                <div class="chart-placeholder h-64 rounded-lg flex items-center justify-center relative">
+                                    <canvas id="citizenTrendChart" width="400" height="200"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Public Accountability Section -->
+                    <div class="bg-white rounded-xl card-shadow p-8">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-6">🔍 Public Accountability</h2>
+                        
+                        <div class="grid md:grid-cols-3 gap-6 mb-6">
+                            <div class="bg-green-50 rounded-lg p-4 border border-green-200">
+                                <div class="flex items-center mb-2">
+                                    <span class="text-2xl mr-2">✅</span>
+                                    <h4 class="font-semibold text-green-800">Audit Compliance</h4>
+                                </div>
+                                <p class="text-2xl font-bold text-green-600">98%</p>
+                                <p class="text-sm text-gray-600">All financial records audited</p>
+                            </div>
+                            
+                            <div class="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                                <div class="flex items-center mb-2">
+                                    <span class="text-2xl mr-2">📋</span>
+                                    <h4 class="font-semibold text-blue-800">Public Reports</h4>
+                                </div>
+                                <p class="text-2xl font-bold text-blue-600">Monthly</p>
+                                <p class="text-sm text-gray-600">Regular financial updates</p>
+                            </div>
+                            
+                            <div class="bg-purple-50 rounded-lg p-4 border border-purple-200">
+                                <div class="flex items-center mb-2">
+                                    <span class="text-2xl mr-2">🎯</span>
+                                    <h4 class="font-semibold text-purple-800">Goal Achievement</h4>
+                                </div>
+                                <p class="text-2xl font-bold text-purple-600">92%</p>
+                                <p class="text-sm text-gray-600">Budget targets met</p>
+                            </div>
+                        </div>
+
+                        <div class="bg-gray-50 rounded-lg p-6">
+                            <h4 class="font-semibold mb-4 text-gray-800">📢 Recent Public Updates</h4>
+                            <div class="space-y-3">
+                                <div class="bg-white rounded-lg p-4 border-l-4 border-blue-500">
+                                    <p class="font-medium text-gray-800">Q4 Financial Report Published</p>
+                                    <p class="text-sm text-gray-600">Complete breakdown of departmental spending and achievements</p>
+                                    <p class="text-xs text-gray-500 mt-1">Published 2 days ago</p>
+                                </div>
+                                <div class="bg-white rounded-lg p-4 border-l-4 border-green-500">
+                                    <p class="font-medium text-gray-800">New Infrastructure Projects Approved</p>
+                                    <p class="text-sm text-gray-600">₹45 L allocated for campus modernization and lab upgrades</p>
+                                    <p class="text-xs text-gray-500 mt-1">Published 1 week ago</p>
+                                </div>
+                                <div class="bg-white rounded-lg p-4 border-l-4 border-purple-500">
+                                    <p class="font-medium text-gray-800">Student Feedback Integration</p>
+                                    <p class="text-sm text-gray-600">Budget adjustments made based on student voting results</p>
+                                    <p class="text-xs text-gray-500 mt-1">Published 2 weeks ago</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
             } else if (currentUserType === 'stakeholder') {
                 content.innerHTML = `
                     <div class="mb-8">
@@ -1259,6 +1513,205 @@
                             <h2 class="text-xl font-bold text-red-800 mb-4">🚨 Anomaly Detection Alerts</h2>
                             <div id="anomalyList" class="space-y-3">
                                 <!-- Anomalies will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else if (currentUserType === 'citizens') {
+                content.innerHTML = `
+                    <div class="mb-8">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-6">Citizens Dashboard</h2>
+                        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 mb-8 border border-blue-200">
+                            <div class="flex items-center mb-4">
+                                <span class="text-3xl mr-3">👥</span>
+                                <div>
+                                    <h3 class="text-xl font-bold text-blue-800">Public Financial Transparency</h3>
+                                    <p class="text-blue-600">Access to institutional financial overview</p>
+                                </div>
+                            </div>
+                            <p class="text-gray-700">As a citizen, you have access to high-level financial information to ensure transparency and accountability in public institutions.</p>
+                        </div>
+                        
+                        <div class="grid md:grid-cols-3 gap-6 mb-8">
+                            <div class="bg-white rounded-xl card-shadow p-6">
+                                <h3 class="text-lg font-semibold mb-2">Total Public Budget</h3>
+                                <p class="text-3xl font-bold text-primary-blue">₹2.5 Cr</p>
+                                <p class="text-sm text-gray-600">Annual allocation</p>
+                            </div>
+                            <div class="bg-white rounded-xl card-shadow p-6">
+                                <h3 class="text-lg font-semibold mb-2">Departments Funded</h3>
+                                <p class="text-3xl font-bold text-success-green">12</p>
+                                <p class="text-sm text-gray-600">Active departments</p>
+                            </div>
+                            <div class="bg-white rounded-xl card-shadow p-6">
+                                <h3 class="text-lg font-semibold mb-2">Transparency Score</h3>
+                                <p class="text-3xl font-bold text-purple-600">95%</p>
+                                <p class="text-sm text-gray-600">Public disclosure</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Overall Financial Distribution -->
+                    <div class="bg-white rounded-xl card-shadow p-8 mb-8">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-6">💰 Overall Financial Distribution</h2>
+                        
+                        <div class="grid md:grid-cols-2 gap-8 mb-8">
+                            <!-- Major Categories -->
+                            <div class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6 border border-green-200">
+                                <h3 class="text-xl font-bold text-green-800 mb-4">🏫 Academic Departments</h3>
+                                <div class="space-y-4">
+                                    <div class="flex justify-between items-center p-3 bg-white rounded-lg">
+                                        <div>
+                                            <p class="font-medium text-gray-800">Engineering Departments</p>
+                                            <p class="text-sm text-gray-600">CS, ECE, Mechanical, Civil</p>
+                                        </div>
+                                        <span class="font-bold text-green-600">₹1.8 Cr</span>
+                                    </div>
+                                    <div class="flex justify-between items-center p-3 bg-white rounded-lg">
+                                        <div>
+                                            <p class="font-medium text-gray-800">Research & Development</p>
+                                            <p class="text-sm text-gray-600">Innovation projects, labs</p>
+                                        </div>
+                                        <span class="font-bold text-green-600">₹35 L</span>
+                                    </div>
+                                    <div class="flex justify-between items-center p-3 bg-white rounded-lg">
+                                        <div>
+                                            <p class="font-medium text-gray-800">Faculty Development</p>
+                                            <p class="text-sm text-gray-600">Training, conferences</p>
+                                        </div>
+                                        <span class="font-bold text-green-600">₹15 L</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Student Activities -->
+                            <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200">
+                                <h3 class="text-xl font-bold text-blue-800 mb-4">🎓 Student Activities</h3>
+                                <div class="space-y-4">
+                                    <div class="flex justify-between items-center p-3 bg-white rounded-lg">
+                                        <div>
+                                            <p class="font-medium text-gray-800">Student Clubs</p>
+                                            <p class="text-sm text-gray-600">Technical, cultural, sports</p>
+                                        </div>
+                                        <span class="font-bold text-blue-600">₹18 L</span>
+                                    </div>
+                                    <div class="flex justify-between items-center p-3 bg-white rounded-lg">
+                                        <div>
+                                            <p class="font-medium text-gray-800">Events & Competitions</p>
+                                            <p class="text-sm text-gray-600">Annual fest, hackathons</p>
+                                        </div>
+                                        <span class="font-bold text-blue-600">₹12 L</span>
+                                    </div>
+                                    <div class="flex justify-between items-center p-3 bg-white rounded-lg">
+                                        <div>
+                                            <p class="font-medium text-gray-800">Student Welfare</p>
+                                            <p class="text-sm text-gray-600">Scholarships, support</p>
+                                        </div>
+                                        <span class="font-bold text-blue-600">₹8 L</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Infrastructure & Operations -->
+                        <div class="bg-gradient-to-br from-orange-50 to-yellow-50 rounded-xl p-6 border border-orange-200">
+                            <h3 class="text-xl font-bold text-orange-800 mb-4">🏗️ Infrastructure & Operations</h3>
+                            <div class="grid md:grid-cols-3 gap-4">
+                                <div class="flex justify-between items-center p-3 bg-white rounded-lg">
+                                    <div>
+                                        <p class="font-medium text-gray-800">Campus Maintenance</p>
+                                        <p class="text-sm text-gray-600">Buildings, utilities</p>
+                                    </div>
+                                    <span class="font-bold text-orange-600">₹25 L</span>
+                                </div>
+                                <div class="flex justify-between items-center p-3 bg-white rounded-lg">
+                                    <div>
+                                        <p class="font-medium text-gray-800">Technology Upgrades</p>
+                                        <p class="text-sm text-gray-600">IT infrastructure</p>
+                                    </div>
+                                    <span class="font-bold text-orange-600">₹20 L</span>
+                                </div>
+                                <div class="flex justify-between items-center p-3 bg-white rounded-lg">
+                                    <div>
+                                        <p class="font-medium text-gray-800">Administrative</p>
+                                        <p class="text-sm text-gray-600">Operations, staff</p>
+                                    </div>
+                                    <span class="font-bold text-orange-600">₹15 L</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- High-Level Visualization -->
+                    <div class="bg-white rounded-xl card-shadow p-8 mb-8">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-6">📊 Budget Overview & Trends</h2>
+                        <div class="grid md:grid-cols-2 gap-8">
+                            <div>
+                                <h3 class="text-lg font-semibold mb-4">Annual Budget Distribution</h3>
+                                <div class="chart-placeholder h-64 rounded-lg flex items-center justify-center relative">
+                                    <canvas id="citizenBudgetChart" width="400" height="200"></canvas>
+                                </div>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold mb-4">Quarterly Spending Trends</h3>
+                                <div class="chart-placeholder h-64 rounded-lg flex items-center justify-center relative">
+                                    <canvas id="citizenTrendChart" width="400" height="200"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Public Accountability Section -->
+                    <div class="bg-white rounded-xl card-shadow p-8">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-6">🔍 Public Accountability</h2>
+                        
+                        <div class="grid md:grid-cols-3 gap-6 mb-6">
+                            <div class="bg-green-50 rounded-lg p-4 border border-green-200">
+                                <div class="flex items-center mb-2">
+                                    <span class="text-2xl mr-2">✅</span>
+                                    <h4 class="font-semibold text-green-800">Audit Compliance</h4>
+                                </div>
+                                <p class="text-2xl font-bold text-green-600">98%</p>
+                                <p class="text-sm text-gray-600">All financial records audited</p>
+                            </div>
+                            
+                            <div class="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                                <div class="flex items-center mb-2">
+                                    <span class="text-2xl mr-2">📋</span>
+                                    <h4 class="font-semibold text-blue-800">Public Reports</h4>
+                                </div>
+                                <p class="text-2xl font-bold text-blue-600">Monthly</p>
+                                <p class="text-sm text-gray-600">Regular financial updates</p>
+                            </div>
+                            
+                            <div class="bg-purple-50 rounded-lg p-4 border border-purple-200">
+                                <div class="flex items-center mb-2">
+                                    <span class="text-2xl mr-2">🎯</span>
+                                    <h4 class="font-semibold text-purple-800">Goal Achievement</h4>
+                                </div>
+                                <p class="text-2xl font-bold text-purple-600">92%</p>
+                                <p class="text-sm text-gray-600">Budget targets met</p>
+                            </div>
+                        </div>
+
+                        <div class="bg-gray-50 rounded-lg p-6">
+                            <h4 class="font-semibold mb-4 text-gray-800">📢 Recent Public Updates</h4>
+                            <div class="space-y-3">
+                                <div class="bg-white rounded-lg p-4 border-l-4 border-blue-500">
+                                    <p class="font-medium text-gray-800">Q4 Financial Report Published</p>
+                                    <p class="text-sm text-gray-600">Complete breakdown of departmental spending and achievements</p>
+                                    <p class="text-xs text-gray-500 mt-1">Published 2 days ago</p>
+                                </div>
+                                <div class="bg-white rounded-lg p-4 border-l-4 border-green-500">
+                                    <p class="font-medium text-gray-800">New Infrastructure Projects Approved</p>
+                                    <p class="text-sm text-gray-600">₹45 L allocated for campus modernization and lab upgrades</p>
+                                    <p class="text-xs text-gray-500 mt-1">Published 1 week ago</p>
+                                </div>
+                                <div class="bg-white rounded-lg p-4 border-l-4 border-purple-500">
+                                    <p class="font-medium text-gray-800">Student Feedback Integration</p>
+                                    <p class="text-sm text-gray-600">Budget adjustments made based on student voting results</p>
+                                    <p class="text-xs text-gray-500 mt-1">Published 2 weeks ago</p>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1564,6 +2017,205 @@
                         </div>
                     </div>
                 `;
+            } else if (currentUserType === 'citizens') {
+                content.innerHTML = `
+                    <div class="mb-8">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-6">Citizens Dashboard</h2>
+                        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 mb-8 border border-blue-200">
+                            <div class="flex items-center mb-4">
+                                <span class="text-3xl mr-3">👥</span>
+                                <div>
+                                    <h3 class="text-xl font-bold text-blue-800">Public Financial Transparency</h3>
+                                    <p class="text-blue-600">Access to institutional financial overview</p>
+                                </div>
+                            </div>
+                            <p class="text-gray-700">As a citizen, you have access to high-level financial information to ensure transparency and accountability in public institutions.</p>
+                        </div>
+                        
+                        <div class="grid md:grid-cols-3 gap-6 mb-8">
+                            <div class="bg-white rounded-xl card-shadow p-6">
+                                <h3 class="text-lg font-semibold mb-2">Total Public Budget</h3>
+                                <p class="text-3xl font-bold text-primary-blue">₹2.5 Cr</p>
+                                <p class="text-sm text-gray-600">Annual allocation</p>
+                            </div>
+                            <div class="bg-white rounded-xl card-shadow p-6">
+                                <h3 class="text-lg font-semibold mb-2">Departments Funded</h3>
+                                <p class="text-3xl font-bold text-success-green">12</p>
+                                <p class="text-sm text-gray-600">Active departments</p>
+                            </div>
+                            <div class="bg-white rounded-xl card-shadow p-6">
+                                <h3 class="text-lg font-semibold mb-2">Transparency Score</h3>
+                                <p class="text-3xl font-bold text-purple-600">95%</p>
+                                <p class="text-sm text-gray-600">Public disclosure</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Overall Financial Distribution -->
+                    <div class="bg-white rounded-xl card-shadow p-8 mb-8">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-6">💰 Overall Financial Distribution</h2>
+                        
+                        <div class="grid md:grid-cols-2 gap-8 mb-8">
+                            <!-- Major Categories -->
+                            <div class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6 border border-green-200">
+                                <h3 class="text-xl font-bold text-green-800 mb-4">🏫 Academic Departments</h3>
+                                <div class="space-y-4">
+                                    <div class="flex justify-between items-center p-3 bg-white rounded-lg">
+                                        <div>
+                                            <p class="font-medium text-gray-800">Engineering Departments</p>
+                                            <p class="text-sm text-gray-600">CS, ECE, Mechanical, Civil</p>
+                                        </div>
+                                        <span class="font-bold text-green-600">₹1.8 Cr</span>
+                                    </div>
+                                    <div class="flex justify-between items-center p-3 bg-white rounded-lg">
+                                        <div>
+                                            <p class="font-medium text-gray-800">Research & Development</p>
+                                            <p class="text-sm text-gray-600">Innovation projects, labs</p>
+                                        </div>
+                                        <span class="font-bold text-green-600">₹35 L</span>
+                                    </div>
+                                    <div class="flex justify-between items-center p-3 bg-white rounded-lg">
+                                        <div>
+                                            <p class="font-medium text-gray-800">Faculty Development</p>
+                                            <p class="text-sm text-gray-600">Training, conferences</p>
+                                        </div>
+                                        <span class="font-bold text-green-600">₹15 L</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Student Activities -->
+                            <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200">
+                                <h3 class="text-xl font-bold text-blue-800 mb-4">🎓 Student Activities</h3>
+                                <div class="space-y-4">
+                                    <div class="flex justify-between items-center p-3 bg-white rounded-lg">
+                                        <div>
+                                            <p class="font-medium text-gray-800">Student Clubs</p>
+                                            <p class="text-sm text-gray-600">Technical, cultural, sports</p>
+                                        </div>
+                                        <span class="font-bold text-blue-600">₹18 L</span>
+                                    </div>
+                                    <div class="flex justify-between items-center p-3 bg-white rounded-lg">
+                                        <div>
+                                            <p class="font-medium text-gray-800">Events & Competitions</p>
+                                            <p class="text-sm text-gray-600">Annual fest, hackathons</p>
+                                        </div>
+                                        <span class="font-bold text-blue-600">₹12 L</span>
+                                    </div>
+                                    <div class="flex justify-between items-center p-3 bg-white rounded-lg">
+                                        <div>
+                                            <p class="font-medium text-gray-800">Student Welfare</p>
+                                            <p class="text-sm text-gray-600">Scholarships, support</p>
+                                        </div>
+                                        <span class="font-bold text-blue-600">₹8 L</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Infrastructure & Operations -->
+                        <div class="bg-gradient-to-br from-orange-50 to-yellow-50 rounded-xl p-6 border border-orange-200">
+                            <h3 class="text-xl font-bold text-orange-800 mb-4">🏗️ Infrastructure & Operations</h3>
+                            <div class="grid md:grid-cols-3 gap-4">
+                                <div class="flex justify-between items-center p-3 bg-white rounded-lg">
+                                    <div>
+                                        <p class="font-medium text-gray-800">Campus Maintenance</p>
+                                        <p class="text-sm text-gray-600">Buildings, utilities</p>
+                                    </div>
+                                    <span class="font-bold text-orange-600">₹25 L</span>
+                                </div>
+                                <div class="flex justify-between items-center p-3 bg-white rounded-lg">
+                                    <div>
+                                        <p class="font-medium text-gray-800">Technology Upgrades</p>
+                                        <p class="text-sm text-gray-600">IT infrastructure</p>
+                                    </div>
+                                    <span class="font-bold text-orange-600">₹20 L</span>
+                                </div>
+                                <div class="flex justify-between items-center p-3 bg-white rounded-lg">
+                                    <div>
+                                        <p class="font-medium text-gray-800">Administrative</p>
+                                        <p class="text-sm text-gray-600">Operations, staff</p>
+                                    </div>
+                                    <span class="font-bold text-orange-600">₹15 L</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- High-Level Visualization -->
+                    <div class="bg-white rounded-xl card-shadow p-8 mb-8">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-6">📊 Budget Overview & Trends</h2>
+                        <div class="grid md:grid-cols-2 gap-8">
+                            <div>
+                                <h3 class="text-lg font-semibold mb-4">Annual Budget Distribution</h3>
+                                <div class="chart-placeholder h-64 rounded-lg flex items-center justify-center relative">
+                                    <canvas id="citizenBudgetChart" width="400" height="200"></canvas>
+                                </div>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold mb-4">Quarterly Spending Trends</h3>
+                                <div class="chart-placeholder h-64 rounded-lg flex items-center justify-center relative">
+                                    <canvas id="citizenTrendChart" width="400" height="200"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Public Accountability Section -->
+                    <div class="bg-white rounded-xl card-shadow p-8">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-6">🔍 Public Accountability</h2>
+                        
+                        <div class="grid md:grid-cols-3 gap-6 mb-6">
+                            <div class="bg-green-50 rounded-lg p-4 border border-green-200">
+                                <div class="flex items-center mb-2">
+                                    <span class="text-2xl mr-2">✅</span>
+                                    <h4 class="font-semibold text-green-800">Audit Compliance</h4>
+                                </div>
+                                <p class="text-2xl font-bold text-green-600">98%</p>
+                                <p class="text-sm text-gray-600">All financial records audited</p>
+                            </div>
+                            
+                            <div class="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                                <div class="flex items-center mb-2">
+                                    <span class="text-2xl mr-2">📋</span>
+                                    <h4 class="font-semibold text-blue-800">Public Reports</h4>
+                                </div>
+                                <p class="text-2xl font-bold text-blue-600">Monthly</p>
+                                <p class="text-sm text-gray-600">Regular financial updates</p>
+                            </div>
+                            
+                            <div class="bg-purple-50 rounded-lg p-4 border border-purple-200">
+                                <div class="flex items-center mb-2">
+                                    <span class="text-2xl mr-2">🎯</span>
+                                    <h4 class="font-semibold text-purple-800">Goal Achievement</h4>
+                                </div>
+                                <p class="text-2xl font-bold text-purple-600">92%</p>
+                                <p class="text-sm text-gray-600">Budget targets met</p>
+                            </div>
+                        </div>
+
+                        <div class="bg-gray-50 rounded-lg p-6">
+                            <h4 class="font-semibold mb-4 text-gray-800">📢 Recent Public Updates</h4>
+                            <div class="space-y-3">
+                                <div class="bg-white rounded-lg p-4 border-l-4 border-blue-500">
+                                    <p class="font-medium text-gray-800">Q4 Financial Report Published</p>
+                                    <p class="text-sm text-gray-600">Complete breakdown of departmental spending and achievements</p>
+                                    <p class="text-xs text-gray-500 mt-1">Published 2 days ago</p>
+                                </div>
+                                <div class="bg-white rounded-lg p-4 border-l-4 border-green-500">
+                                    <p class="font-medium text-gray-800">New Infrastructure Projects Approved</p>
+                                    <p class="text-sm text-gray-600">₹45 L allocated for campus modernization and lab upgrades</p>
+                                    <p class="text-xs text-gray-500 mt-1">Published 1 week ago</p>
+                                </div>
+                                <div class="bg-white rounded-lg p-4 border-l-4 border-purple-500">
+                                    <p class="font-medium text-gray-800">Student Feedback Integration</p>
+                                    <p class="text-sm text-gray-600">Budget adjustments made based on student voting results</p>
+                                    <p class="text-xs text-gray-500 mt-1">Published 2 weeks ago</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
             }
             
             // Initialize dashboard features after content is loaded
@@ -1571,6 +2223,8 @@
                 if (currentUserType === 'student') {
                     displayTransactions();
                     drawCharts();
+                } else if (currentUserType === 'citizens') {
+                    drawCitizenCharts();
                 }
             }, 100);
         }
@@ -2087,6 +2741,165 @@
             }
         }
 
+        function drawCitizenCharts() {
+            // Citizens-specific charts with high-level overview
+            const budgetCanvas = document.getElementById('citizenBudgetChart');
+            const trendCanvas = document.getElementById('citizenTrendChart');
+            
+            if (budgetCanvas && budgetCanvas.getContext) {
+                const ctx1 = budgetCanvas.getContext('2d');
+                ctx1.clearRect(0, 0, 400, 200);
+                
+                // Pie chart for overall budget distribution
+                const centerX = 180, centerY = 100, radius = 70;
+                const segments = [
+                    { label: 'Academic Departments', value: 72, color: '#10b981', amount: '₹1.8 Cr' },
+                    { label: 'Student Activities', value: 15, color: '#3b82f6', amount: '₹38 L' },
+                    { label: 'Infrastructure', value: 13, color: '#f59e0b', amount: '₹32 L' }
+                ];
+                
+                let currentAngle = -Math.PI / 2;
+                
+                segments.forEach((segment, index) => {
+                    const sliceAngle = (segment.value / 100) * 2 * Math.PI;
+                    
+                    // Draw shadow
+                    ctx1.save();
+                    ctx1.translate(2, 2);
+                    ctx1.beginPath();
+                    ctx1.moveTo(centerX, centerY);
+                    ctx1.arc(centerX, centerY, radius, currentAngle, currentAngle + sliceAngle);
+                    ctx1.closePath();
+                    ctx1.fillStyle = 'rgba(0, 0, 0, 0.1)';
+                    ctx1.fill();
+                    ctx1.restore();
+                    
+                    // Draw main slice
+                    const gradient = ctx1.createRadialGradient(centerX, centerY, 0, centerX, centerY, radius);
+                    gradient.addColorStop(0, segment.color);
+                    gradient.addColorStop(1, segment.color + '80');
+                    
+                    ctx1.beginPath();
+                    ctx1.moveTo(centerX, centerY);
+                    ctx1.arc(centerX, centerY, radius, currentAngle, currentAngle + sliceAngle);
+                    ctx1.closePath();
+                    ctx1.fillStyle = gradient;
+                    ctx1.fill();
+                    
+                    ctx1.strokeStyle = 'white';
+                    ctx1.lineWidth = 2;
+                    ctx1.stroke();
+                    
+                    // Add percentage labels
+                    const labelAngle = currentAngle + sliceAngle / 2;
+                    const labelX = centerX + Math.cos(labelAngle) * (radius * 0.6);
+                    const labelY = centerY + Math.sin(labelAngle) * (radius * 0.6);
+                    
+                    ctx1.fillStyle = 'white';
+                    ctx1.font = 'bold 12px sans-serif';
+                    ctx1.textAlign = 'center';
+                    ctx1.fillText(segment.value + '%', labelX, labelY);
+                    
+                    currentAngle += sliceAngle;
+                });
+                
+                // Add legend
+                segments.forEach((segment, index) => {
+                    const legendY = 40 + (index * 30);
+                    const legendX = 280;
+                    
+                    ctx1.fillStyle = segment.color;
+                    ctx1.fillRect(legendX, legendY - 8, 12, 12);
+                    
+                    ctx1.fillStyle = '#374151';
+                    ctx1.font = '10px sans-serif';
+                    ctx1.textAlign = 'left';
+                    ctx1.fillText(segment.label, legendX + 18, legendY + 2);
+                    
+                    ctx1.fillStyle = '#6b7280';
+                    ctx1.font = 'bold 9px sans-serif';
+                    ctx1.fillText(segment.amount, legendX + 18, legendY + 14);
+                });
+                
+                ctx1.fillStyle = '#1f2937';
+                ctx1.font = 'bold 14px sans-serif';
+                ctx1.textAlign = 'left';
+                ctx1.fillText('Annual Budget Overview', 20, 20);
+            }
+            
+            if (trendCanvas && trendCanvas.getContext) {
+                const ctx2 = trendCanvas.getContext('2d');
+                ctx2.clearRect(0, 0, 400, 200);
+                
+                // Quarterly trend chart
+                ctx2.strokeStyle = '#e5e7eb';
+                ctx2.lineWidth = 1;
+                for (let i = 0; i <= 4; i++) {
+                    const y = 40 + (i * 30);
+                    ctx2.beginPath();
+                    ctx2.moveTo(50, y);
+                    ctx2.lineTo(370, y);
+                    ctx2.stroke();
+                }
+                
+                // Draw trend line
+                const gradient = ctx2.createLinearGradient(0, 0, 0, 200);
+                gradient.addColorStop(0, 'rgba(16, 185, 129, 0.8)');
+                gradient.addColorStop(1, 'rgba(16, 185, 129, 0.2)');
+                
+                ctx2.strokeStyle = '#10b981';
+                ctx2.lineWidth = 4;
+                ctx2.beginPath();
+                
+                const quarters = [80, 65, 70, 55];
+                const amounts = ['₹58 L', '₹72 L', '₹65 L', '₹85 L'];
+                
+                quarters.forEach((point, index) => {
+                    const x = 80 + (index * 80);
+                    const y = point;
+                    if (index === 0) ctx2.moveTo(x, y);
+                    else ctx2.lineTo(x, y);
+                    
+                    // Draw data points
+                    ctx2.save();
+                    ctx2.fillStyle = '#10b981';
+                    ctx2.beginPath();
+                    ctx2.arc(x, y, 6, 0, 2 * Math.PI);
+                    ctx2.fill();
+                    ctx2.restore();
+                });
+                ctx2.stroke();
+                
+                // Fill area
+                ctx2.lineTo(320, 160);
+                ctx2.lineTo(80, 160);
+                ctx2.closePath();
+                ctx2.fillStyle = gradient;
+                ctx2.fill();
+                
+                // Add labels
+                ctx2.fillStyle = '#374151';
+                ctx2.font = '11px sans-serif';
+                ctx2.textAlign = 'center';
+                const quarterLabels = ['Q1', 'Q2', 'Q3', 'Q4'];
+                quarterLabels.forEach((quarter, index) => {
+                    const x = 80 + (index * 80);
+                    ctx2.fillText(quarter, x, 180);
+                    
+                    ctx2.fillStyle = '#1f2937';
+                    ctx2.font = 'bold 9px sans-serif';
+                    ctx2.fillText(amounts[index], x, quarters[index] - 12);
+                    ctx2.fillStyle = '#374151';
+                    ctx2.font = '11px sans-serif';
+                });
+                
+                ctx2.fillStyle = '#1f2937';
+                ctx2.font = 'bold 14px sans-serif';
+                ctx2.textAlign = 'left';
+                ctx2.fillText('Quarterly Spending Trends', 50, 25);
+            }
+        }
+
         function globalSearch() {
             const searchTerm = document.getElementById('dashboardSearch').value.toLowerCase();
             if (!searchTerm) {
@@ -2145,5 +2958,5 @@
         // Initialize the application
         showLogin();
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97e89e4267717fa9',t:'MTc1Nzc3NjcxOC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97e9af88b53ab155',t:'MTc1Nzc4NzkxMC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

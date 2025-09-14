@@ -100,7 +100,7 @@
     <div id="whoAreYouPage" class="min-h-screen bg-gray-50 p-4 hidden">
         <div class="max-w-4xl mx-auto pt-12">
             <h1 class="text-4xl font-bold text-gray-800 text-center mb-12">Who Are You?</h1>
-            <div class="grid md:grid-cols-3 gap-8 mb-12">
+            <div class="grid md:grid-cols-4 gap-6 mb-12">
                 <div onclick="selectUserType('student')" 
                      class="bg-white rounded-2xl card-shadow p-8 text-center cursor-pointer hover:bg-blue-50 transition duration-300 border-2 border-transparent hover:border-primary-blue">
                     <div class="text-6xl mb-4">🎓</div>
@@ -115,6 +115,11 @@
                      class="bg-white rounded-2xl card-shadow p-8 text-center cursor-pointer hover:bg-blue-50 transition duration-300 border-2 border-transparent hover:border-primary-blue">
                     <div class="text-6xl mb-4">🏛️</div>
                     <h3 class="text-xl font-semibold text-gray-800">Government</h3>
+                </div>
+                <div onclick="selectUserType('citizens')" 
+                     class="bg-white rounded-2xl card-shadow p-8 text-center cursor-pointer hover:bg-blue-50 transition duration-300 border-2 border-transparent hover:border-primary-blue">
+                    <div class="text-6xl mb-4">👥</div>
+                    <h3 class="text-xl font-semibold text-gray-800">Citizens</h3>
                 </div>
             </div>
             <div class="text-center">
@@ -202,6 +207,9 @@
                                class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-transparent outline-none"
                                onkeyup="globalSearch()"
                                onchange="globalSearch()">
+                        <button onclick="openSimpleFeedbackModal()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition duration-300 text-sm">
+                            💭 Feedback
+                        </button>
                         <button onclick="logout()" class="text-gray-600 hover:text-gray-800">Logout</button>
                     </div>
                 </div>
@@ -294,11 +302,104 @@
         </div>
     </div>
 
+    <!-- Feedback Modal -->
+    <div id="feedbackModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-2xl p-6 max-w-md w-full mx-4 popup">
+            <h3 class="text-lg font-semibold mb-4">💭 Share Your Feedback</h3>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Your Suggestion or Feedback</label>
+                    <textarea id="feedbackText" rows="6" placeholder="Tell us what you think! Share suggestions for budget allocation, platform improvements, or any other feedback..." 
+                              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-transparent outline-none resize-none"></textarea>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Email (Optional)</label>
+                    <input type="email" id="feedbackEmail" placeholder="your.email@example.com" 
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-transparent outline-none">
+                </div>
+                <div class="flex space-x-3">
+                    <button onclick="submitSimpleFeedback()" class="flex-1 bg-primary-blue hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition duration-300">
+                        Submit Feedback
+                    </button>
+                    <button onclick="closeFeedbackModal()" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition duration-300">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chatbot -->
+    <div id="chatButton" onclick="toggleChat()" class="fixed bottom-6 right-6 bg-primary-blue hover:bg-blue-700 text-white rounded-full p-4 shadow-lg cursor-pointer transition duration-300 z-40">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+        </svg>
+    </div>
+
+    <!-- Chat Window -->
+    <div id="chatWindow" class="fixed bottom-24 right-6 w-80 bg-white rounded-2xl shadow-2xl border border-gray-200 z-40 hidden">
+        <div class="bg-primary-blue text-white p-4 rounded-t-2xl">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <div class="w-8 h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center mr-3">
+                        <span class="text-sm">🤖</span>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold">Fiscality Assistant</h4>
+                        <p class="text-xs opacity-90">Always here to help!</p>
+                    </div>
+                </div>
+                <button onclick="toggleChat()" class="text-white hover:bg-white hover:bg-opacity-20 rounded-full p-1">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        
+        <div id="chatMessages" class="h-64 overflow-y-auto p-4 space-y-3">
+            <div class="flex items-start">
+                <div class="w-8 h-8 bg-primary-blue rounded-full flex items-center justify-center mr-2 flex-shrink-0">
+                    <span class="text-white text-xs">🤖</span>
+                </div>
+                <div class="bg-gray-100 rounded-lg p-3 max-w-xs">
+                    <p class="text-sm">Hi! I'm your Fiscality assistant. I can help you with budget information, transaction searches, voting processes, and more. What would you like to know?</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="p-4 border-t border-gray-200">
+            <div class="flex space-x-2 mb-3">
+                <button onclick="sendQuickMessage('Show me budget breakdown')" class="bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-1 rounded-full text-xs transition duration-300">
+                    💰 Budget Info
+                </button>
+                <button onclick="sendQuickMessage('How do I vote?')" class="bg-green-100 hover:bg-green-200 text-green-700 px-3 py-1 rounded-full text-xs transition duration-300">
+                    🗳️ Voting Help
+                </button>
+                <button onclick="sendQuickMessage('Search help')" class="bg-purple-100 hover:bg-purple-200 text-purple-700 px-3 py-1 rounded-full text-xs transition duration-300">
+                    🔍 Search Tips
+                </button>
+            </div>
+            <div class="flex">
+                <input type="text" id="chatInput" placeholder="Ask me anything..." 
+                       class="flex-1 px-3 py-2 border border-gray-300 rounded-l-lg focus:ring-2 focus:ring-primary-blue focus:border-transparent outline-none text-sm"
+                       onkeypress="handleChatKeyPress(event)">
+                <button onclick="sendChatMessage()" class="bg-primary-blue hover:bg-blue-700 text-white px-4 py-2 rounded-r-lg transition duration-300">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
         let currentUserType = '';
         let verificationCode = '';
         let userVotes = { funding: false, clubs: false, deptFunding: false, clubFunding: false };
         let anomalyDetectionEnabled = false;
+        let chatHistory = [];
+        let feedbackSubmissions = [];
         let allTransactions = [
             { 
                 id: 1, 
@@ -577,6 +678,13 @@
                     <input type="password" id="govPassword" placeholder="Password (minimum 10 characters)" 
                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-transparent outline-none">
                 `;
+            } else if (currentUserType === 'citizens') {
+                fieldsContainer.innerHTML = `
+                    <input type="email" id="citizenEmail" placeholder="Email" 
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-transparent outline-none">
+                    <input type="password" id="citizenPassword" placeholder="Password" 
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-transparent outline-none">
+                `;
             }
             
             // Initialize dashboard features after content is loaded
@@ -584,6 +692,8 @@
                 if (currentUserType === 'student') {
                     displayTransactions();
                     drawCharts();
+                } else if (currentUserType === 'citizens') {
+                    drawCitizenCharts();
                 }
             }, 100);
         }
@@ -597,6 +707,23 @@
                             <div class="text-4xl mb-4 text-red-500">⚠️</div>
                             <h3 class="text-lg font-semibold mb-2">Invalid Password Length</h3>
                             <p class="text-gray-600">Password must be more than 9 characters</p>
+                        </div>
+                    `);
+                    return;
+                }
+                showDashboard();
+                return;
+            }
+
+            if (currentUserType === 'citizens') {
+                const email = document.getElementById('citizenEmail').value;
+                const password = document.getElementById('citizenPassword').value;
+                if (!email || !password) {
+                    showPopup(`
+                        <div class="text-center">
+                            <div class="text-4xl mb-4 text-red-500">⚠️</div>
+                            <h3 class="text-lg font-semibold mb-2">Missing Information</h3>
+                            <p class="text-gray-600">Please enter both email and password</p>
                         </div>
                     `);
                     return;
@@ -962,6 +1089,205 @@
                         </div>
                     </div>
                 `;
+            } else if (currentUserType === 'citizens') {
+                content.innerHTML = `
+                    <div class="mb-8">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-6">Citizens Dashboard</h2>
+                        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 mb-8 border border-blue-200">
+                            <div class="flex items-center mb-4">
+                                <span class="text-3xl mr-3">👥</span>
+                                <div>
+                                    <h3 class="text-xl font-bold text-blue-800">Public Financial Transparency</h3>
+                                    <p class="text-blue-600">Access to institutional financial overview</p>
+                                </div>
+                            </div>
+                            <p class="text-gray-700">As a citizen, you have access to high-level financial information to ensure transparency and accountability in public institutions.</p>
+                        </div>
+                        
+                        <div class="grid md:grid-cols-3 gap-6 mb-8">
+                            <div class="bg-white rounded-xl card-shadow p-6">
+                                <h3 class="text-lg font-semibold mb-2">Total Public Budget</h3>
+                                <p class="text-3xl font-bold text-primary-blue">₹2.5 Cr</p>
+                                <p class="text-sm text-gray-600">Annual allocation</p>
+                            </div>
+                            <div class="bg-white rounded-xl card-shadow p-6">
+                                <h3 class="text-lg font-semibold mb-2">Departments Funded</h3>
+                                <p class="text-3xl font-bold text-success-green">12</p>
+                                <p class="text-sm text-gray-600">Active departments</p>
+                            </div>
+                            <div class="bg-white rounded-xl card-shadow p-6">
+                                <h3 class="text-lg font-semibold mb-2">Transparency Score</h3>
+                                <p class="text-3xl font-bold text-purple-600">95%</p>
+                                <p class="text-sm text-gray-600">Public disclosure</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Overall Financial Distribution -->
+                    <div class="bg-white rounded-xl card-shadow p-8 mb-8">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-6">💰 Overall Financial Distribution</h2>
+                        
+                        <div class="grid md:grid-cols-2 gap-8 mb-8">
+                            <!-- Major Categories -->
+                            <div class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6 border border-green-200">
+                                <h3 class="text-xl font-bold text-green-800 mb-4">🏫 Academic Departments</h3>
+                                <div class="space-y-4">
+                                    <div class="flex justify-between items-center p-3 bg-white rounded-lg">
+                                        <div>
+                                            <p class="font-medium text-gray-800">Engineering Departments</p>
+                                            <p class="text-sm text-gray-600">CS, ECE, Mechanical, Civil</p>
+                                        </div>
+                                        <span class="font-bold text-green-600">₹1.8 Cr</span>
+                                    </div>
+                                    <div class="flex justify-between items-center p-3 bg-white rounded-lg">
+                                        <div>
+                                            <p class="font-medium text-gray-800">Research & Development</p>
+                                            <p class="text-sm text-gray-600">Innovation projects, labs</p>
+                                        </div>
+                                        <span class="font-bold text-green-600">₹35 L</span>
+                                    </div>
+                                    <div class="flex justify-between items-center p-3 bg-white rounded-lg">
+                                        <div>
+                                            <p class="font-medium text-gray-800">Faculty Development</p>
+                                            <p class="text-sm text-gray-600">Training, conferences</p>
+                                        </div>
+                                        <span class="font-bold text-green-600">₹15 L</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Student Activities -->
+                            <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200">
+                                <h3 class="text-xl font-bold text-blue-800 mb-4">🎓 Student Activities</h3>
+                                <div class="space-y-4">
+                                    <div class="flex justify-between items-center p-3 bg-white rounded-lg">
+                                        <div>
+                                            <p class="font-medium text-gray-800">Student Clubs</p>
+                                            <p class="text-sm text-gray-600">Technical, cultural, sports</p>
+                                        </div>
+                                        <span class="font-bold text-blue-600">₹18 L</span>
+                                    </div>
+                                    <div class="flex justify-between items-center p-3 bg-white rounded-lg">
+                                        <div>
+                                            <p class="font-medium text-gray-800">Events & Competitions</p>
+                                            <p class="text-sm text-gray-600">Annual fest, hackathons</p>
+                                        </div>
+                                        <span class="font-bold text-blue-600">₹12 L</span>
+                                    </div>
+                                    <div class="flex justify-between items-center p-3 bg-white rounded-lg">
+                                        <div>
+                                            <p class="font-medium text-gray-800">Student Welfare</p>
+                                            <p class="text-sm text-gray-600">Scholarships, support</p>
+                                        </div>
+                                        <span class="font-bold text-blue-600">₹8 L</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Infrastructure & Operations -->
+                        <div class="bg-gradient-to-br from-orange-50 to-yellow-50 rounded-xl p-6 border border-orange-200">
+                            <h3 class="text-xl font-bold text-orange-800 mb-4">🏗️ Infrastructure & Operations</h3>
+                            <div class="grid md:grid-cols-3 gap-4">
+                                <div class="flex justify-between items-center p-3 bg-white rounded-lg">
+                                    <div>
+                                        <p class="font-medium text-gray-800">Campus Maintenance</p>
+                                        <p class="text-sm text-gray-600">Buildings, utilities</p>
+                                    </div>
+                                    <span class="font-bold text-orange-600">₹25 L</span>
+                                </div>
+                                <div class="flex justify-between items-center p-3 bg-white rounded-lg">
+                                    <div>
+                                        <p class="font-medium text-gray-800">Technology Upgrades</p>
+                                        <p class="text-sm text-gray-600">IT infrastructure</p>
+                                    </div>
+                                    <span class="font-bold text-orange-600">₹20 L</span>
+                                </div>
+                                <div class="flex justify-between items-center p-3 bg-white rounded-lg">
+                                    <div>
+                                        <p class="font-medium text-gray-800">Administrative</p>
+                                        <p class="text-sm text-gray-600">Operations, staff</p>
+                                    </div>
+                                    <span class="font-bold text-orange-600">₹15 L</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- High-Level Visualization -->
+                    <div class="bg-white rounded-xl card-shadow p-8 mb-8">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-6">📊 Budget Overview & Trends</h2>
+                        <div class="grid md:grid-cols-2 gap-8">
+                            <div>
+                                <h3 class="text-lg font-semibold mb-4">Annual Budget Distribution</h3>
+                                <div class="chart-placeholder h-64 rounded-lg flex items-center justify-center relative">
+                                    <canvas id="citizenBudgetChart" width="400" height="200"></canvas>
+                                </div>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold mb-4">Quarterly Spending Trends</h3>
+                                <div class="chart-placeholder h-64 rounded-lg flex items-center justify-center relative">
+                                    <canvas id="citizenTrendChart" width="400" height="200"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Public Accountability Section -->
+                    <div class="bg-white rounded-xl card-shadow p-8">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-6">🔍 Public Accountability</h2>
+                        
+                        <div class="grid md:grid-cols-3 gap-6 mb-6">
+                            <div class="bg-green-50 rounded-lg p-4 border border-green-200">
+                                <div class="flex items-center mb-2">
+                                    <span class="text-2xl mr-2">✅</span>
+                                    <h4 class="font-semibold text-green-800">Audit Compliance</h4>
+                                </div>
+                                <p class="text-2xl font-bold text-green-600">98%</p>
+                                <p class="text-sm text-gray-600">All financial records audited</p>
+                            </div>
+                            
+                            <div class="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                                <div class="flex items-center mb-2">
+                                    <span class="text-2xl mr-2">📋</span>
+                                    <h4 class="font-semibold text-blue-800">Public Reports</h4>
+                                </div>
+                                <p class="text-2xl font-bold text-blue-600">Monthly</p>
+                                <p class="text-sm text-gray-600">Regular financial updates</p>
+                            </div>
+                            
+                            <div class="bg-purple-50 rounded-lg p-4 border border-purple-200">
+                                <div class="flex items-center mb-2">
+                                    <span class="text-2xl mr-2">🎯</span>
+                                    <h4 class="font-semibold text-purple-800">Goal Achievement</h4>
+                                </div>
+                                <p class="text-2xl font-bold text-purple-600">92%</p>
+                                <p class="text-sm text-gray-600">Budget targets met</p>
+                            </div>
+                        </div>
+
+                        <div class="bg-gray-50 rounded-lg p-6">
+                            <h4 class="font-semibold mb-4 text-gray-800">📢 Recent Public Updates</h4>
+                            <div class="space-y-3">
+                                <div class="bg-white rounded-lg p-4 border-l-4 border-blue-500">
+                                    <p class="font-medium text-gray-800">Q4 Financial Report Published</p>
+                                    <p class="text-sm text-gray-600">Complete breakdown of departmental spending and achievements</p>
+                                    <p class="text-xs text-gray-500 mt-1">Published 2 days ago</p>
+                                </div>
+                                <div class="bg-white rounded-lg p-4 border-l-4 border-green-500">
+                                    <p class="font-medium text-gray-800">New Infrastructure Projects Approved</p>
+                                    <p class="text-sm text-gray-600">₹45 L allocated for campus modernization and lab upgrades</p>
+                                    <p class="text-xs text-gray-500 mt-1">Published 1 week ago</p>
+                                </div>
+                                <div class="bg-white rounded-lg p-4 border-l-4 border-purple-500">
+                                    <p class="font-medium text-gray-800">Student Feedback Integration</p>
+                                    <p class="text-sm text-gray-600">Budget adjustments made based on student voting results</p>
+                                    <p class="text-xs text-gray-500 mt-1">Published 2 weeks ago</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
             } else if (currentUserType === 'stakeholder') {
                 content.innerHTML = `
                     <div class="mb-8">
@@ -1259,6 +1585,205 @@
                             <h2 class="text-xl font-bold text-red-800 mb-4">🚨 Anomaly Detection Alerts</h2>
                             <div id="anomalyList" class="space-y-3">
                                 <!-- Anomalies will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else if (currentUserType === 'citizens') {
+                content.innerHTML = `
+                    <div class="mb-8">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-6">Citizens Dashboard</h2>
+                        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 mb-8 border border-blue-200">
+                            <div class="flex items-center mb-4">
+                                <span class="text-3xl mr-3">👥</span>
+                                <div>
+                                    <h3 class="text-xl font-bold text-blue-800">Public Financial Transparency</h3>
+                                    <p class="text-blue-600">Access to institutional financial overview</p>
+                                </div>
+                            </div>
+                            <p class="text-gray-700">As a citizen, you have access to high-level financial information to ensure transparency and accountability in public institutions.</p>
+                        </div>
+                        
+                        <div class="grid md:grid-cols-3 gap-6 mb-8">
+                            <div class="bg-white rounded-xl card-shadow p-6">
+                                <h3 class="text-lg font-semibold mb-2">Total Public Budget</h3>
+                                <p class="text-3xl font-bold text-primary-blue">₹2.5 Cr</p>
+                                <p class="text-sm text-gray-600">Annual allocation</p>
+                            </div>
+                            <div class="bg-white rounded-xl card-shadow p-6">
+                                <h3 class="text-lg font-semibold mb-2">Departments Funded</h3>
+                                <p class="text-3xl font-bold text-success-green">12</p>
+                                <p class="text-sm text-gray-600">Active departments</p>
+                            </div>
+                            <div class="bg-white rounded-xl card-shadow p-6">
+                                <h3 class="text-lg font-semibold mb-2">Transparency Score</h3>
+                                <p class="text-3xl font-bold text-purple-600">95%</p>
+                                <p class="text-sm text-gray-600">Public disclosure</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Overall Financial Distribution -->
+                    <div class="bg-white rounded-xl card-shadow p-8 mb-8">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-6">💰 Overall Financial Distribution</h2>
+                        
+                        <div class="grid md:grid-cols-2 gap-8 mb-8">
+                            <!-- Major Categories -->
+                            <div class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6 border border-green-200">
+                                <h3 class="text-xl font-bold text-green-800 mb-4">🏫 Academic Departments</h3>
+                                <div class="space-y-4">
+                                    <div class="flex justify-between items-center p-3 bg-white rounded-lg">
+                                        <div>
+                                            <p class="font-medium text-gray-800">Engineering Departments</p>
+                                            <p class="text-sm text-gray-600">CS, ECE, Mechanical, Civil</p>
+                                        </div>
+                                        <span class="font-bold text-green-600">₹1.8 Cr</span>
+                                    </div>
+                                    <div class="flex justify-between items-center p-3 bg-white rounded-lg">
+                                        <div>
+                                            <p class="font-medium text-gray-800">Research & Development</p>
+                                            <p class="text-sm text-gray-600">Innovation projects, labs</p>
+                                        </div>
+                                        <span class="font-bold text-green-600">₹35 L</span>
+                                    </div>
+                                    <div class="flex justify-between items-center p-3 bg-white rounded-lg">
+                                        <div>
+                                            <p class="font-medium text-gray-800">Faculty Development</p>
+                                            <p class="text-sm text-gray-600">Training, conferences</p>
+                                        </div>
+                                        <span class="font-bold text-green-600">₹15 L</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Student Activities -->
+                            <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200">
+                                <h3 class="text-xl font-bold text-blue-800 mb-4">🎓 Student Activities</h3>
+                                <div class="space-y-4">
+                                    <div class="flex justify-between items-center p-3 bg-white rounded-lg">
+                                        <div>
+                                            <p class="font-medium text-gray-800">Student Clubs</p>
+                                            <p class="text-sm text-gray-600">Technical, cultural, sports</p>
+                                        </div>
+                                        <span class="font-bold text-blue-600">₹18 L</span>
+                                    </div>
+                                    <div class="flex justify-between items-center p-3 bg-white rounded-lg">
+                                        <div>
+                                            <p class="font-medium text-gray-800">Events & Competitions</p>
+                                            <p class="text-sm text-gray-600">Annual fest, hackathons</p>
+                                        </div>
+                                        <span class="font-bold text-blue-600">₹12 L</span>
+                                    </div>
+                                    <div class="flex justify-between items-center p-3 bg-white rounded-lg">
+                                        <div>
+                                            <p class="font-medium text-gray-800">Student Welfare</p>
+                                            <p class="text-sm text-gray-600">Scholarships, support</p>
+                                        </div>
+                                        <span class="font-bold text-blue-600">₹8 L</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Infrastructure & Operations -->
+                        <div class="bg-gradient-to-br from-orange-50 to-yellow-50 rounded-xl p-6 border border-orange-200">
+                            <h3 class="text-xl font-bold text-orange-800 mb-4">🏗️ Infrastructure & Operations</h3>
+                            <div class="grid md:grid-cols-3 gap-4">
+                                <div class="flex justify-between items-center p-3 bg-white rounded-lg">
+                                    <div>
+                                        <p class="font-medium text-gray-800">Campus Maintenance</p>
+                                        <p class="text-sm text-gray-600">Buildings, utilities</p>
+                                    </div>
+                                    <span class="font-bold text-orange-600">₹25 L</span>
+                                </div>
+                                <div class="flex justify-between items-center p-3 bg-white rounded-lg">
+                                    <div>
+                                        <p class="font-medium text-gray-800">Technology Upgrades</p>
+                                        <p class="text-sm text-gray-600">IT infrastructure</p>
+                                    </div>
+                                    <span class="font-bold text-orange-600">₹20 L</span>
+                                </div>
+                                <div class="flex justify-between items-center p-3 bg-white rounded-lg">
+                                    <div>
+                                        <p class="font-medium text-gray-800">Administrative</p>
+                                        <p class="text-sm text-gray-600">Operations, staff</p>
+                                    </div>
+                                    <span class="font-bold text-orange-600">₹15 L</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- High-Level Visualization -->
+                    <div class="bg-white rounded-xl card-shadow p-8 mb-8">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-6">📊 Budget Overview & Trends</h2>
+                        <div class="grid md:grid-cols-2 gap-8">
+                            <div>
+                                <h3 class="text-lg font-semibold mb-4">Annual Budget Distribution</h3>
+                                <div class="chart-placeholder h-64 rounded-lg flex items-center justify-center relative">
+                                    <canvas id="citizenBudgetChart" width="400" height="200"></canvas>
+                                </div>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold mb-4">Quarterly Spending Trends</h3>
+                                <div class="chart-placeholder h-64 rounded-lg flex items-center justify-center relative">
+                                    <canvas id="citizenTrendChart" width="400" height="200"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Public Accountability Section -->
+                    <div class="bg-white rounded-xl card-shadow p-8">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-6">🔍 Public Accountability</h2>
+                        
+                        <div class="grid md:grid-cols-3 gap-6 mb-6">
+                            <div class="bg-green-50 rounded-lg p-4 border border-green-200">
+                                <div class="flex items-center mb-2">
+                                    <span class="text-2xl mr-2">✅</span>
+                                    <h4 class="font-semibold text-green-800">Audit Compliance</h4>
+                                </div>
+                                <p class="text-2xl font-bold text-green-600">98%</p>
+                                <p class="text-sm text-gray-600">All financial records audited</p>
+                            </div>
+                            
+                            <div class="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                                <div class="flex items-center mb-2">
+                                    <span class="text-2xl mr-2">📋</span>
+                                    <h4 class="font-semibold text-blue-800">Public Reports</h4>
+                                </div>
+                                <p class="text-2xl font-bold text-blue-600">Monthly</p>
+                                <p class="text-sm text-gray-600">Regular financial updates</p>
+                            </div>
+                            
+                            <div class="bg-purple-50 rounded-lg p-4 border border-purple-200">
+                                <div class="flex items-center mb-2">
+                                    <span class="text-2xl mr-2">🎯</span>
+                                    <h4 class="font-semibold text-purple-800">Goal Achievement</h4>
+                                </div>
+                                <p class="text-2xl font-bold text-purple-600">92%</p>
+                                <p class="text-sm text-gray-600">Budget targets met</p>
+                            </div>
+                        </div>
+
+                        <div class="bg-gray-50 rounded-lg p-6">
+                            <h4 class="font-semibold mb-4 text-gray-800">📢 Recent Public Updates</h4>
+                            <div class="space-y-3">
+                                <div class="bg-white rounded-lg p-4 border-l-4 border-blue-500">
+                                    <p class="font-medium text-gray-800">Q4 Financial Report Published</p>
+                                    <p class="text-sm text-gray-600">Complete breakdown of departmental spending and achievements</p>
+                                    <p class="text-xs text-gray-500 mt-1">Published 2 days ago</p>
+                                </div>
+                                <div class="bg-white rounded-lg p-4 border-l-4 border-green-500">
+                                    <p class="font-medium text-gray-800">New Infrastructure Projects Approved</p>
+                                    <p class="text-sm text-gray-600">₹45 L allocated for campus modernization and lab upgrades</p>
+                                    <p class="text-xs text-gray-500 mt-1">Published 1 week ago</p>
+                                </div>
+                                <div class="bg-white rounded-lg p-4 border-l-4 border-purple-500">
+                                    <p class="font-medium text-gray-800">Student Feedback Integration</p>
+                                    <p class="text-sm text-gray-600">Budget adjustments made based on student voting results</p>
+                                    <p class="text-xs text-gray-500 mt-1">Published 2 weeks ago</p>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1564,6 +2089,205 @@
                         </div>
                     </div>
                 `;
+            } else if (currentUserType === 'citizens') {
+                content.innerHTML = `
+                    <div class="mb-8">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-6">Citizens Dashboard</h2>
+                        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 mb-8 border border-blue-200">
+                            <div class="flex items-center mb-4">
+                                <span class="text-3xl mr-3">👥</span>
+                                <div>
+                                    <h3 class="text-xl font-bold text-blue-800">Public Financial Transparency</h3>
+                                    <p class="text-blue-600">Access to institutional financial overview</p>
+                                </div>
+                            </div>
+                            <p class="text-gray-700">As a citizen, you have access to high-level financial information to ensure transparency and accountability in public institutions.</p>
+                        </div>
+                        
+                        <div class="grid md:grid-cols-3 gap-6 mb-8">
+                            <div class="bg-white rounded-xl card-shadow p-6">
+                                <h3 class="text-lg font-semibold mb-2">Total Public Budget</h3>
+                                <p class="text-3xl font-bold text-primary-blue">₹2.5 Cr</p>
+                                <p class="text-sm text-gray-600">Annual allocation</p>
+                            </div>
+                            <div class="bg-white rounded-xl card-shadow p-6">
+                                <h3 class="text-lg font-semibold mb-2">Departments Funded</h3>
+                                <p class="text-3xl font-bold text-success-green">12</p>
+                                <p class="text-sm text-gray-600">Active departments</p>
+                            </div>
+                            <div class="bg-white rounded-xl card-shadow p-6">
+                                <h3 class="text-lg font-semibold mb-2">Transparency Score</h3>
+                                <p class="text-3xl font-bold text-purple-600">95%</p>
+                                <p class="text-sm text-gray-600">Public disclosure</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Overall Financial Distribution -->
+                    <div class="bg-white rounded-xl card-shadow p-8 mb-8">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-6">💰 Overall Financial Distribution</h2>
+                        
+                        <div class="grid md:grid-cols-2 gap-8 mb-8">
+                            <!-- Major Categories -->
+                            <div class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6 border border-green-200">
+                                <h3 class="text-xl font-bold text-green-800 mb-4">🏫 Academic Departments</h3>
+                                <div class="space-y-4">
+                                    <div class="flex justify-between items-center p-3 bg-white rounded-lg">
+                                        <div>
+                                            <p class="font-medium text-gray-800">Engineering Departments</p>
+                                            <p class="text-sm text-gray-600">CS, ECE, Mechanical, Civil</p>
+                                        </div>
+                                        <span class="font-bold text-green-600">₹1.8 Cr</span>
+                                    </div>
+                                    <div class="flex justify-between items-center p-3 bg-white rounded-lg">
+                                        <div>
+                                            <p class="font-medium text-gray-800">Research & Development</p>
+                                            <p class="text-sm text-gray-600">Innovation projects, labs</p>
+                                        </div>
+                                        <span class="font-bold text-green-600">₹35 L</span>
+                                    </div>
+                                    <div class="flex justify-between items-center p-3 bg-white rounded-lg">
+                                        <div>
+                                            <p class="font-medium text-gray-800">Faculty Development</p>
+                                            <p class="text-sm text-gray-600">Training, conferences</p>
+                                        </div>
+                                        <span class="font-bold text-green-600">₹15 L</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Student Activities -->
+                            <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200">
+                                <h3 class="text-xl font-bold text-blue-800 mb-4">🎓 Student Activities</h3>
+                                <div class="space-y-4">
+                                    <div class="flex justify-between items-center p-3 bg-white rounded-lg">
+                                        <div>
+                                            <p class="font-medium text-gray-800">Student Clubs</p>
+                                            <p class="text-sm text-gray-600">Technical, cultural, sports</p>
+                                        </div>
+                                        <span class="font-bold text-blue-600">₹18 L</span>
+                                    </div>
+                                    <div class="flex justify-between items-center p-3 bg-white rounded-lg">
+                                        <div>
+                                            <p class="font-medium text-gray-800">Events & Competitions</p>
+                                            <p class="text-sm text-gray-600">Annual fest, hackathons</p>
+                                        </div>
+                                        <span class="font-bold text-blue-600">₹12 L</span>
+                                    </div>
+                                    <div class="flex justify-between items-center p-3 bg-white rounded-lg">
+                                        <div>
+                                            <p class="font-medium text-gray-800">Student Welfare</p>
+                                            <p class="text-sm text-gray-600">Scholarships, support</p>
+                                        </div>
+                                        <span class="font-bold text-blue-600">₹8 L</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Infrastructure & Operations -->
+                        <div class="bg-gradient-to-br from-orange-50 to-yellow-50 rounded-xl p-6 border border-orange-200">
+                            <h3 class="text-xl font-bold text-orange-800 mb-4">🏗️ Infrastructure & Operations</h3>
+                            <div class="grid md:grid-cols-3 gap-4">
+                                <div class="flex justify-between items-center p-3 bg-white rounded-lg">
+                                    <div>
+                                        <p class="font-medium text-gray-800">Campus Maintenance</p>
+                                        <p class="text-sm text-gray-600">Buildings, utilities</p>
+                                    </div>
+                                    <span class="font-bold text-orange-600">₹25 L</span>
+                                </div>
+                                <div class="flex justify-between items-center p-3 bg-white rounded-lg">
+                                    <div>
+                                        <p class="font-medium text-gray-800">Technology Upgrades</p>
+                                        <p class="text-sm text-gray-600">IT infrastructure</p>
+                                    </div>
+                                    <span class="font-bold text-orange-600">₹20 L</span>
+                                </div>
+                                <div class="flex justify-between items-center p-3 bg-white rounded-lg">
+                                    <div>
+                                        <p class="font-medium text-gray-800">Administrative</p>
+                                        <p class="text-sm text-gray-600">Operations, staff</p>
+                                    </div>
+                                    <span class="font-bold text-orange-600">₹15 L</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- High-Level Visualization -->
+                    <div class="bg-white rounded-xl card-shadow p-8 mb-8">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-6">📊 Budget Overview & Trends</h2>
+                        <div class="grid md:grid-cols-2 gap-8">
+                            <div>
+                                <h3 class="text-lg font-semibold mb-4">Annual Budget Distribution</h3>
+                                <div class="chart-placeholder h-64 rounded-lg flex items-center justify-center relative">
+                                    <canvas id="citizenBudgetChart" width="400" height="200"></canvas>
+                                </div>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold mb-4">Quarterly Spending Trends</h3>
+                                <div class="chart-placeholder h-64 rounded-lg flex items-center justify-center relative">
+                                    <canvas id="citizenTrendChart" width="400" height="200"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Public Accountability Section -->
+                    <div class="bg-white rounded-xl card-shadow p-8">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-6">🔍 Public Accountability</h2>
+                        
+                        <div class="grid md:grid-cols-3 gap-6 mb-6">
+                            <div class="bg-green-50 rounded-lg p-4 border border-green-200">
+                                <div class="flex items-center mb-2">
+                                    <span class="text-2xl mr-2">✅</span>
+                                    <h4 class="font-semibold text-green-800">Audit Compliance</h4>
+                                </div>
+                                <p class="text-2xl font-bold text-green-600">98%</p>
+                                <p class="text-sm text-gray-600">All financial records audited</p>
+                            </div>
+                            
+                            <div class="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                                <div class="flex items-center mb-2">
+                                    <span class="text-2xl mr-2">📋</span>
+                                    <h4 class="font-semibold text-blue-800">Public Reports</h4>
+                                </div>
+                                <p class="text-2xl font-bold text-blue-600">Monthly</p>
+                                <p class="text-sm text-gray-600">Regular financial updates</p>
+                            </div>
+                            
+                            <div class="bg-purple-50 rounded-lg p-4 border border-purple-200">
+                                <div class="flex items-center mb-2">
+                                    <span class="text-2xl mr-2">🎯</span>
+                                    <h4 class="font-semibold text-purple-800">Goal Achievement</h4>
+                                </div>
+                                <p class="text-2xl font-bold text-purple-600">92%</p>
+                                <p class="text-sm text-gray-600">Budget targets met</p>
+                            </div>
+                        </div>
+
+                        <div class="bg-gray-50 rounded-lg p-6">
+                            <h4 class="font-semibold mb-4 text-gray-800">📢 Recent Public Updates</h4>
+                            <div class="space-y-3">
+                                <div class="bg-white rounded-lg p-4 border-l-4 border-blue-500">
+                                    <p class="font-medium text-gray-800">Q4 Financial Report Published</p>
+                                    <p class="text-sm text-gray-600">Complete breakdown of departmental spending and achievements</p>
+                                    <p class="text-xs text-gray-500 mt-1">Published 2 days ago</p>
+                                </div>
+                                <div class="bg-white rounded-lg p-4 border-l-4 border-green-500">
+                                    <p class="font-medium text-gray-800">New Infrastructure Projects Approved</p>
+                                    <p class="text-sm text-gray-600">₹45 L allocated for campus modernization and lab upgrades</p>
+                                    <p class="text-xs text-gray-500 mt-1">Published 1 week ago</p>
+                                </div>
+                                <div class="bg-white rounded-lg p-4 border-l-4 border-purple-500">
+                                    <p class="font-medium text-gray-800">Student Feedback Integration</p>
+                                    <p class="text-sm text-gray-600">Budget adjustments made based on student voting results</p>
+                                    <p class="text-xs text-gray-500 mt-1">Published 2 weeks ago</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
             }
             
             // Initialize dashboard features after content is loaded
@@ -1571,6 +2295,8 @@
                 if (currentUserType === 'student') {
                     displayTransactions();
                     drawCharts();
+                } else if (currentUserType === 'citizens') {
+                    drawCitizenCharts();
                 }
             }, 100);
         }
@@ -2087,63 +2813,588 @@
             }
         }
 
+        function drawCitizenCharts() {
+            // Citizens-specific charts with high-level overview
+            const budgetCanvas = document.getElementById('citizenBudgetChart');
+            const trendCanvas = document.getElementById('citizenTrendChart');
+            
+            if (budgetCanvas && budgetCanvas.getContext) {
+                const ctx1 = budgetCanvas.getContext('2d');
+                ctx1.clearRect(0, 0, 400, 200);
+                
+                // Pie chart for overall budget distribution
+                const centerX = 180, centerY = 100, radius = 70;
+                const segments = [
+                    { label: 'Academic Departments', value: 72, color: '#10b981', amount: '₹1.8 Cr' },
+                    { label: 'Student Activities', value: 15, color: '#3b82f6', amount: '₹38 L' },
+                    { label: 'Infrastructure', value: 13, color: '#f59e0b', amount: '₹32 L' }
+                ];
+                
+                let currentAngle = -Math.PI / 2;
+                
+                segments.forEach((segment, index) => {
+                    const sliceAngle = (segment.value / 100) * 2 * Math.PI;
+                    
+                    // Draw shadow
+                    ctx1.save();
+                    ctx1.translate(2, 2);
+                    ctx1.beginPath();
+                    ctx1.moveTo(centerX, centerY);
+                    ctx1.arc(centerX, centerY, radius, currentAngle, currentAngle + sliceAngle);
+                    ctx1.closePath();
+                    ctx1.fillStyle = 'rgba(0, 0, 0, 0.1)';
+                    ctx1.fill();
+                    ctx1.restore();
+                    
+                    // Draw main slice
+                    const gradient = ctx1.createRadialGradient(centerX, centerY, 0, centerX, centerY, radius);
+                    gradient.addColorStop(0, segment.color);
+                    gradient.addColorStop(1, segment.color + '80');
+                    
+                    ctx1.beginPath();
+                    ctx1.moveTo(centerX, centerY);
+                    ctx1.arc(centerX, centerY, radius, currentAngle, currentAngle + sliceAngle);
+                    ctx1.closePath();
+                    ctx1.fillStyle = gradient;
+                    ctx1.fill();
+                    
+                    ctx1.strokeStyle = 'white';
+                    ctx1.lineWidth = 2;
+                    ctx1.stroke();
+                    
+                    // Add percentage labels
+                    const labelAngle = currentAngle + sliceAngle / 2;
+                    const labelX = centerX + Math.cos(labelAngle) * (radius * 0.6);
+                    const labelY = centerY + Math.sin(labelAngle) * (radius * 0.6);
+                    
+                    ctx1.fillStyle = 'white';
+                    ctx1.font = 'bold 12px sans-serif';
+                    ctx1.textAlign = 'center';
+                    ctx1.fillText(segment.value + '%', labelX, labelY);
+                    
+                    currentAngle += sliceAngle;
+                });
+                
+                // Add legend
+                segments.forEach((segment, index) => {
+                    const legendY = 40 + (index * 30);
+                    const legendX = 280;
+                    
+                    ctx1.fillStyle = segment.color;
+                    ctx1.fillRect(legendX, legendY - 8, 12, 12);
+                    
+                    ctx1.fillStyle = '#374151';
+                    ctx1.font = '10px sans-serif';
+                    ctx1.textAlign = 'left';
+                    ctx1.fillText(segment.label, legendX + 18, legendY + 2);
+                    
+                    ctx1.fillStyle = '#6b7280';
+                    ctx1.font = 'bold 9px sans-serif';
+                    ctx1.fillText(segment.amount, legendX + 18, legendY + 14);
+                });
+                
+                ctx1.fillStyle = '#1f2937';
+                ctx1.font = 'bold 14px sans-serif';
+                ctx1.textAlign = 'left';
+                ctx1.fillText('Annual Budget Overview', 20, 20);
+            }
+            
+            if (trendCanvas && trendCanvas.getContext) {
+                const ctx2 = trendCanvas.getContext('2d');
+                ctx2.clearRect(0, 0, 400, 200);
+                
+                // Quarterly trend chart
+                ctx2.strokeStyle = '#e5e7eb';
+                ctx2.lineWidth = 1;
+                for (let i = 0; i <= 4; i++) {
+                    const y = 40 + (i * 30);
+                    ctx2.beginPath();
+                    ctx2.moveTo(50, y);
+                    ctx2.lineTo(370, y);
+                    ctx2.stroke();
+                }
+                
+                // Draw trend line
+                const gradient = ctx2.createLinearGradient(0, 0, 0, 200);
+                gradient.addColorStop(0, 'rgba(16, 185, 129, 0.8)');
+                gradient.addColorStop(1, 'rgba(16, 185, 129, 0.2)');
+                
+                ctx2.strokeStyle = '#10b981';
+                ctx2.lineWidth = 4;
+                ctx2.beginPath();
+                
+                const quarters = [80, 65, 70, 55];
+                const amounts = ['₹58 L', '₹72 L', '₹65 L', '₹85 L'];
+                
+                quarters.forEach((point, index) => {
+                    const x = 80 + (index * 80);
+                    const y = point;
+                    if (index === 0) ctx2.moveTo(x, y);
+                    else ctx2.lineTo(x, y);
+                    
+                    // Draw data points
+                    ctx2.save();
+                    ctx2.fillStyle = '#10b981';
+                    ctx2.beginPath();
+                    ctx2.arc(x, y, 6, 0, 2 * Math.PI);
+                    ctx2.fill();
+                    ctx2.restore();
+                });
+                ctx2.stroke();
+                
+                // Fill area
+                ctx2.lineTo(320, 160);
+                ctx2.lineTo(80, 160);
+                ctx2.closePath();
+                ctx2.fillStyle = gradient;
+                ctx2.fill();
+                
+                // Add labels
+                ctx2.fillStyle = '#374151';
+                ctx2.font = '11px sans-serif';
+                ctx2.textAlign = 'center';
+                const quarterLabels = ['Q1', 'Q2', 'Q3', 'Q4'];
+                quarterLabels.forEach((quarter, index) => {
+                    const x = 80 + (index * 80);
+                    ctx2.fillText(quarter, x, 180);
+                    
+                    ctx2.fillStyle = '#1f2937';
+                    ctx2.font = 'bold 9px sans-serif';
+                    ctx2.fillText(amounts[index], x, quarters[index] - 12);
+                    ctx2.fillStyle = '#374151';
+                    ctx2.font = '11px sans-serif';
+                });
+                
+                ctx2.fillStyle = '#1f2937';
+                ctx2.font = 'bold 14px sans-serif';
+                ctx2.textAlign = 'left';
+                ctx2.fillText('Quarterly Spending Trends', 50, 25);
+            }
+        }
+
         function globalSearch() {
-            const searchTerm = document.getElementById('dashboardSearch').value.toLowerCase();
+            const searchTerm = document.getElementById('dashboardSearch').value.toLowerCase().trim();
+            
+            // Clear any existing search result banners
+            const existingBanners = document.querySelectorAll('.search-results-banner');
+            existingBanners.forEach(banner => banner.remove());
+            
             if (!searchTerm) {
                 filteredTransactions = [...allTransactions];
                 displayTransactions();
                 return;
             }
             
+            // Enhanced search that looks through all transaction fields
             filteredTransactions = allTransactions.filter(transaction => {
-                return transaction.department.toLowerCase().includes(searchTerm) || 
-                       transaction.vendor.toLowerCase().includes(searchTerm) ||
-                       transaction.description.toLowerCase().includes(searchTerm) ||
-                       transaction.recipient.toLowerCase().includes(searchTerm) ||
-                       transaction.approvedBy.toLowerCase().includes(searchTerm) ||
-                       transaction.purpose.toLowerCase().includes(searchTerm) ||
-                       transaction.paymentMode.toLowerCase().includes(searchTerm) ||
-                       transaction.status.toLowerCase().includes(searchTerm) ||
-                       formatIndianCurrency(transaction.amount).toLowerCase().includes(searchTerm) ||
-                       transaction.amount.toString().includes(searchTerm);
+                const searchableFields = [
+                    transaction.department,
+                    transaction.vendor,
+                    transaction.description,
+                    transaction.recipient,
+                    transaction.approvedBy,
+                    transaction.purpose,
+                    transaction.paymentMode,
+                    transaction.status,
+                    transaction.date,
+                    transaction.time,
+                    formatIndianCurrency(transaction.amount),
+                    transaction.amount.toString(),
+                    `#TXN${transaction.id.toString().padStart(6, '0')}` // Transaction ID
+                ];
+                
+                return searchableFields.some(field => 
+                    field && field.toLowerCase().includes(searchTerm)
+                );
             });
             
             displayTransactions();
             
-            // Show search results count with enhanced info
+            // Show search results with enhanced feedback
             const resultsCount = filteredTransactions.length;
-            if (resultsCount === 0) {
-                showPopup(`
-                    <div class="text-center">
-                        <div class="text-4xl mb-4">🔍</div>
-                        <h3 class="text-lg font-semibold mb-2">No Results Found</h3>
-                        <p class="text-gray-600">No transactions match "${searchTerm}"</p>
-                        <div class="mt-4 text-sm text-gray-500">
-                            <p>Try searching by:</p>
-                            <p>• Department name • Vendor • Amount • Recipient • Status</p>
-                        </div>
-                    </div>
-                `);
-            } else if (resultsCount > 0 && searchTerm.length > 2) {
-                // Show brief results summary for successful searches
-                setTimeout(() => {
-                    const container = document.getElementById('transactionsList');
-                    if (container && container.children.length > 0) {
-                        container.insertAdjacentHTML('afterbegin', `
-                            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-                                <div class="flex items-center">
-                                    <span class="text-blue-600 mr-2">🔍</span>
-                                    <span class="text-blue-800 font-medium">Found ${resultsCount} transaction${resultsCount > 1 ? 's' : ''} matching "${searchTerm}"</span>
+            const container = document.getElementById('transactionsList');
+            
+            if (container) {
+                if (resultsCount === 0) {
+                    container.innerHTML = `
+                        <div class="search-results-banner bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center">
+                            <div class="text-4xl mb-4">🔍</div>
+                            <h3 class="text-lg font-semibold mb-2 text-yellow-800">No Results Found</h3>
+                            <p class="text-yellow-700 mb-4">No transactions match "<span class="font-medium">${searchTerm}</span>"</p>
+                            <div class="bg-white rounded-lg p-4 text-sm text-gray-600">
+                                <p class="font-medium mb-2">Try searching by:</p>
+                                <div class="grid grid-cols-2 gap-2 text-left">
+                                    <p>• Department (e.g., "Computer Science")</p>
+                                    <p>• Vendor (e.g., "Dell", "Microsoft")</p>
+                                    <p>• Amount (e.g., "25", "₹2.5")</p>
+                                    <p>• Status (e.g., "completed", "pending")</p>
+                                    <p>• Date (e.g., "2024-01-15")</p>
+                                    <p>• Transaction ID (e.g., "#TXN000001")</p>
                                 </div>
                             </div>
-                        `);
-                    }
-                }, 100);
+                            <button onclick="clearSearch()" class="mt-4 bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg transition duration-300">
+                                Clear Search
+                            </button>
+                        </div>
+                    `;
+                } else {
+                    // Add search results banner at the top
+                    const totalAmount = filteredTransactions.reduce((sum, t) => sum + t.amount, 0);
+                    const completedCount = filteredTransactions.filter(t => t.status === 'completed').length;
+                    const pendingCount = filteredTransactions.filter(t => t.status === 'pending').length;
+                    
+                    container.insertAdjacentHTML('afterbegin', `
+                        <div class="search-results-banner bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <span class="text-blue-600 mr-3 text-xl">🔍</span>
+                                    <div>
+                                        <h4 class="text-blue-800 font-semibold">Search Results for "${searchTerm}"</h4>
+                                        <p class="text-blue-600 text-sm">
+                                            ${resultsCount} transaction${resultsCount > 1 ? 's' : ''} found • 
+                                            Total: ${formatIndianCurrency(totalAmount)} • 
+                                            ${completedCount} completed, ${pendingCount} pending
+                                        </p>
+                                    </div>
+                                </div>
+                                <button onclick="clearSearch()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm transition duration-300">
+                                    Clear
+                                </button>
+                            </div>
+                        </div>
+                    `);
+                }
             }
+        }
+
+        function clearSearch() {
+            document.getElementById('dashboardSearch').value = '';
+            filteredTransactions = [...allTransactions];
+            displayTransactions();
+            
+            // Clear any existing search result banners
+            const existingBanners = document.querySelectorAll('.search-results-banner');
+            existingBanners.forEach(banner => banner.remove());
+        }
+
+        // Chatbot Functions
+        function toggleChat() {
+            const chatWindow = document.getElementById('chatWindow');
+            chatWindow.classList.toggle('hidden');
+            
+            if (!chatWindow.classList.contains('hidden')) {
+                document.getElementById('chatInput').focus();
+            }
+        }
+
+        function handleChatKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendChatMessage();
+            }
+        }
+
+        function sendQuickMessage(message) {
+            document.getElementById('chatInput').value = message;
+            sendChatMessage();
+        }
+
+        function sendChatMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            // Add user message to chat
+            addChatMessage(message, 'user');
+            input.value = '';
+            
+            // Generate bot response
+            setTimeout(() => {
+                const response = generateBotResponse(message);
+                addChatMessage(response, 'bot');
+            }, 500);
+        }
+
+        function addChatMessage(message, sender) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'flex items-start';
+            
+            if (sender === 'user') {
+                messageDiv.innerHTML = `
+                    <div class="flex items-start justify-end w-full">
+                        <div class="bg-primary-blue text-white rounded-lg p-3 max-w-xs mr-2">
+                            <p class="text-sm">${message}</p>
+                        </div>
+                        <div class="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center flex-shrink-0">
+                            <span class="text-xs">👤</span>
+                        </div>
+                    </div>
+                `;
+            } else {
+                messageDiv.innerHTML = `
+                    <div class="w-8 h-8 bg-primary-blue rounded-full flex items-center justify-center mr-2 flex-shrink-0">
+                        <span class="text-white text-xs">🤖</span>
+                    </div>
+                    <div class="bg-gray-100 rounded-lg p-3 max-w-xs">
+                        <p class="text-sm">${message}</p>
+                    </div>
+                `;
+            }
+            
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            
+            // Store in chat history
+            chatHistory.push({ message, sender, timestamp: new Date() });
+        }
+
+        function generateBotResponse(userMessage) {
+            const message = userMessage.toLowerCase();
+            
+            // Budget-related queries
+            if (message.includes('budget') || message.includes('money') || message.includes('funding')) {
+                if (currentUserType === 'student') {
+                    return "📊 Your department (Computer Science) has a budget of ₹24 L this semester. This includes ₹12 L for lab facilities, ₹8.5 L for faculty salaries, ₹2.5 L for infrastructure, and ₹1 L for research. Student clubs have ₹18 L combined budget. Would you like more specific details?";
+                } else if (currentUserType === 'citizens') {
+                    return "🏛️ The total public budget is ₹2.5 Cr annually. 72% goes to academic departments (₹1.8 Cr), 15% to student activities (₹38 L), and 13% to infrastructure (₹32 L). All spending is audited with 98% compliance rate.";
+                } else {
+                    return "💰 I can provide detailed budget breakdowns, spending patterns, and allocation information. What specific budget area would you like to know about?";
+                }
+            }
+            
+            // Voting-related queries
+            if (message.includes('vote') || message.includes('voting') || message.includes('election')) {
+                return "🗳️ You can participate in budget voting! Currently, there are two active proposals: Department Funding (57% support, 247 votes) and Club Funding (43% support, 189 votes). Click the voting cards in your dashboard to cast your vote. Each user can vote once per proposal.";
+            }
+            
+            // Search help
+            if (message.includes('search') || message.includes('find') || message.includes('transaction')) {
+                return "🔍 You can search transactions by: Department names (Computer Science, Electronics), Vendor names (Dell, Microsoft), Amounts (₹25 L, 2500000), Status (completed, pending), Dates (2024-01-15), or Transaction IDs (#TXN000001). Use the search bar at the top or the detailed filters in the transaction section.";
+            }
+            
+            // Anomaly detection
+            if (message.includes('anomaly') || message.includes('suspicious') || message.includes('unusual')) {
+                return "🚨 Anomaly detection helps identify unusual spending patterns. When enabled, it flags transactions that exceed typical spending by 150% or more. Currently, there are 2 flagged transactions: Mechanical Dept (₹32 L) and Electronics Dept (₹42 L). Enable it using the red button in the transaction section.";
+            }
+            
+            // Transparency and compliance
+            if (message.includes('transparency') || message.includes('audit') || message.includes('compliance')) {
+                return "✅ Our transparency score is 95%! All transactions are publicly audited (98% compliance), with monthly financial reports published. Every transaction shows recipient, approver, payment mode, and detailed purpose. Citizens have access to high-level overviews while students/stakeholders see detailed breakdowns.";
+            }
+            
+            // Feedback process
+            if (message.includes('feedback') || message.includes('suggestion') || message.includes('complaint')) {
+                return "💭 You can provide feedback through the green 'Feedback' button in the top navigation. Students can suggest budget improvements, report issues, or request new features. Stakeholders can provide investment feedback and governance suggestions. All feedback is reviewed and helps improve our platform.";
+            }
+            
+            // User type specific help
+            if (message.includes('student') && currentUserType === 'student') {
+                return "🎓 As a student, you can: View your department's budget breakdown, participate in voting for budget allocations, search all transactions, enable anomaly detection, provide feedback on spending, and track club funding. Your voice matters in shaping institutional finances!";
+            }
+            
+            if (message.includes('stakeholder') && currentUserType === 'stakeholder') {
+                return "💼 As a stakeholder, you have access to: Investment overview (₹45M total, 18.5% ROI), 24 active funded projects, detailed transaction analysis, voting participation, and comprehensive feedback options. You can track fund allocation and portfolio performance.";
+            }
+            
+            // Department-specific queries
+            if (message.includes('computer science') || message.includes('cs')) {
+                return "💻 Computer Science Department: ₹24 L total budget. Recent transactions include ₹25 L for Dell lab equipment and ₹9.5 L for Microsoft licenses. Faculty: 12 professors, Lab facilities: 50 workstations, Research budget: ₹1 L for conferences and publications.";
+            }
+            
+            if (message.includes('electronics') || message.includes('ece')) {
+                return "⚡ Electronics Department: Recent ₹18 L for Siemens components and ₹42 L pending for Texas Instruments processors. Focus on embedded systems lab and circuit design facilities.";
+            }
+            
+            // General help and greetings
+            if (message.includes('hello') || message.includes('hi') || message.includes('help')) {
+                return `Hello! I'm here to help you navigate Fiscality. I can assist with budget information, transaction searches, voting processes, anomaly detection, and answer questions about financial transparency. What would you like to know?`;
+            }
+            
+            // Default response with suggestions
+            return "I'd be happy to help! I can provide information about: 💰 Budget breakdowns, 🗳️ Voting processes, 🔍 Transaction searches, 🚨 Anomaly detection, ✅ Transparency measures, 💭 Feedback options. Try asking about any of these topics or use the quick action buttons below!";
+        }
+
+        // Simple Feedback Functions
+        function openSimpleFeedbackModal() {
+            document.getElementById('feedbackModal').classList.remove('hidden');
+            document.getElementById('feedbackText').focus();
+        }
+
+        function submitSimpleFeedback() {
+            const feedback = document.getElementById('feedbackText').value.trim();
+            const email = document.getElementById('feedbackEmail').value.trim();
+            
+            if (!feedback) {
+                showPopup(`
+                    <div class="text-center">
+                        <div class="text-4xl mb-4 text-red-500">⚠️</div>
+                        <h3 class="text-lg font-semibold mb-2">Missing Feedback</h3>
+                        <p class="text-gray-600">Please enter your feedback before submitting.</p>
+                    </div>
+                `);
+                return;
+            }
+            
+            // Store feedback
+            const feedbackData = {
+                id: feedbackSubmissions.length + 1,
+                feedback,
+                email,
+                userType: currentUserType,
+                timestamp: new Date(),
+                status: 'submitted'
+            };
+            
+            feedbackSubmissions.push(feedbackData);
+            
+            // Clear form
+            document.getElementById('feedbackText').value = '';
+            document.getElementById('feedbackEmail').value = '';
+            
+            // Show success message
+            showPopup(`
+                <div class="text-center">
+                    <div class="text-4xl mb-4 text-success-green">✅</div>
+                    <h3 class="text-lg font-semibold mb-2">Feedback Submitted!</h3>
+                    <p class="text-gray-600 mb-4">Thank you for your valuable input. Your feedback helps us improve Fiscality for everyone.</p>
+                    <div class="bg-green-50 rounded-lg p-4 text-left">
+                        <p class="text-sm text-green-700 mb-1"><strong>Feedback ID:</strong> #FB${feedbackData.id.toString().padStart(4, '0')}</p>
+                        <p class="text-sm text-green-700 mb-1"><strong>Status:</strong> Under Review</p>
+                        <p class="text-sm text-green-700"><strong>Submitted:</strong> ${new Date().toLocaleString()}</p>
+                    </div>
+                </div>
+            `);
+            
+            closeFeedbackModal();
+        }
+
+        function closeFeedbackModal() {
+            document.getElementById('feedbackModal').classList.add('hidden');
+        }
+
+        function showFeedbackForm(category) {
+            const content = document.getElementById('feedbackContent');
+            const categoryTitles = {
+                budget: '💰 Budget Allocation Feedback',
+                platform: '💻 Platform Features Feedback',
+                transparency: '🔍 Transparency Feedback',
+                general: '💭 General Feedback',
+                investment: '📈 Investment Performance Feedback',
+                governance: '🏛️ Governance Feedback',
+                reporting: '📊 Financial Reporting Feedback',
+                strategic: '🎯 Strategic Direction Feedback'
+            };
+            
+            content.innerHTML = `
+                <div class="space-y-6">
+                    <div class="flex items-center">
+                        <button onclick="openFeedbackModal()" class="text-gray-500 hover:text-gray-700 mr-4">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                            </svg>
+                        </button>
+                        <h4 class="text-xl font-semibold text-gray-800">${categoryTitles[category]}</h4>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Priority Level</label>
+                            <select id="feedbackPriority" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-transparent outline-none">
+                                <option value="low">Low - General suggestion</option>
+                                <option value="medium">Medium - Important improvement</option>
+                                <option value="high">High - Critical issue</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Subject</label>
+                            <input type="text" id="feedbackSubject" placeholder="Brief description of your feedback..." 
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-transparent outline-none">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Detailed Feedback</label>
+                            <textarea id="feedbackDetails" rows="6" placeholder="Please provide detailed feedback, suggestions, or report any issues..." 
+                                      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-transparent outline-none resize-none"></textarea>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Contact Information (Optional)</label>
+                            <input type="email" id="feedbackEmail" placeholder="your.email@example.com" 
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-transparent outline-none">
+                            <p class="text-xs text-gray-500 mt-1">We'll only use this to follow up on your feedback if needed</p>
+                        </div>
+                        
+                        <div class="flex space-x-3">
+                            <button onclick="submitFeedback('${category}')" class="flex-1 bg-primary-blue hover:bg-blue-700 text-white py-3 px-6 rounded-lg transition duration-300 font-medium">
+                                📤 Submit Feedback
+                            </button>
+                            <button onclick="openFeedbackModal()" class="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition duration-300">
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function submitFeedback(category) {
+            const priority = document.getElementById('feedbackPriority').value;
+            const subject = document.getElementById('feedbackSubject').value;
+            const details = document.getElementById('feedbackDetails').value;
+            const email = document.getElementById('feedbackEmail').value;
+            
+            if (!subject.trim() || !details.trim()) {
+                showPopup(`
+                    <div class="text-center">
+                        <div class="text-4xl mb-4 text-red-500">⚠️</div>
+                        <h3 class="text-lg font-semibold mb-2">Incomplete Feedback</h3>
+                        <p class="text-gray-600">Please provide both a subject and detailed feedback.</p>
+                    </div>
+                `);
+                return;
+            }
+            
+            // Store feedback
+            const feedback = {
+                id: feedbackSubmissions.length + 1,
+                category,
+                priority,
+                subject,
+                details,
+                email,
+                userType: currentUserType,
+                timestamp: new Date(),
+                status: 'submitted'
+            };
+            
+            feedbackSubmissions.push(feedback);
+            
+            // Show success message
+            showPopup(`
+                <div class="text-center">
+                    <div class="text-4xl mb-4 text-success-green">✅</div>
+                    <h3 class="text-lg font-semibold mb-2">Feedback Submitted Successfully!</h3>
+                    <p class="text-gray-600 mb-4">Thank you for your valuable input. Your feedback helps us improve Fiscality.</p>
+                    <div class="bg-green-50 rounded-lg p-4 text-left">
+                        <p class="text-sm text-green-700 mb-2"><strong>Feedback ID:</strong> #FB${feedback.id.toString().padStart(4, '0')}</p>
+                        <p class="text-sm text-green-700 mb-2"><strong>Category:</strong> ${category}</p>
+                        <p class="text-sm text-green-700 mb-2"><strong>Priority:</strong> ${priority}</p>
+                        <p class="text-sm text-green-700"><strong>Status:</strong> Under Review</p>
+                    </div>
+                </div>
+            `);
+            
+            closeFeedbackModal();
+        }
+
+        function closeFeedbackModal() {
+            document.getElementById('feedbackModal').classList.add('hidden');
         }
 
         // Initialize the application
         showLogin();
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97e89e4267717fa9',t:'MTc1Nzc3NjcxOC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97ea09fcd4748a2a',t:'MTc1Nzc5MTYxNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
