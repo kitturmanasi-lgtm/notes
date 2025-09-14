@@ -1,0 +1,11 @@
+| Feature                        | Status       | Notes                                                                 |
+|--------------------------------|--------------|----------------------------------------------------------------------|
+| User Authentication (Firebase) |  Functional | Email-based login and verification implemented.                      |
+| Role-Based Dashboards      |  Functional | Different user roles (students, parents, govt, admin) show tailored views. |
+| Data Flow Visualization (Looker Studio) |  Functional | Integrated with Looker Studio; live financial charts and breakdowns working. |
+| Audit Trail & Approvals    |  Planned   | Design ready; not yet implemented in backend.                        |
+| Tamper-Proof Ledger (Blockchain) |  Planned   | Conceptual only; future integration for immutable records.            |
+| Plain-Language Summaries   |  Planned   | Prototype text prepared, automation pending.                         |
+| Voting on Budgets          |  Functional | Students can vote on department/club budget allocations.              |
+| Gamified Budget Betting    |  Planned   | Planned feature for light competition between departments.            |
+| Cloud-Agnostic Deployment  |  Partial   | Tech stack designed and validated; manual deployment needed for AWS/Azure/GCP. |
