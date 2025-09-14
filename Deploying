@@ -1,0 +1,8 @@
+How to Run
+
+Our deployment process is designed to be **cloud-agnostic**. While each college or institution may store data differently 
+(databases, spreadsheets, APIs, or cloud-native tools), the underlying process remains the same. The core framework is built on **Canva AI (HTML/JS)**,
+ edited and integrated using **Cursor** and **Replit**. Depending on the institution’s infrastructure, the “engine” layer can be swapped out, for example,
+ AWS (S3 + SES), Azure (Blob Storage + Communication Services), or GCP (Cloud Storage + Looker Studio). This ensures the base framework remains consistent while 
+still adapting to local technical requirements. Visualizations can be generated through **Looker Studio or Power BI**, connected to the institution’s chosen data 
+source.
